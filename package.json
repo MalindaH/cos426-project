@@ -16,11 +16,11 @@
     "this last entry CANNOT have a comma after it ->"
   ],
   "scripts": {
-    "start": "webpack-dev-server --mode development --output-public-path \"\"",
+    "start": "export NODE_OPTIONS=--openssl-legacy-provider && webpack-dev-server --mode development --output-public-path \"\"",
     "prebuild": "rimraf ./build && mkdirp ./build",
-    "build": "npm run prebuild && webpack --mode production --progress --output-public-path \"\"",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && npm run prebuild && webpack --mode production --progress --output-public-path \"\"",
     "format": "prettier --write '*.js' 'src/**/*.js'",
-    "deploy": "npm run prebuild && webpack --mode production --progress && gh-pages -d build"
+    "deploy": "export NODE_OPTIONS=--openssl-legacy-provider && npm run prebuild && webpack --mode production --progress && gh-pages -d build"
   },
   "dependencies": {
     "dat.gui": "^0.7.7",
