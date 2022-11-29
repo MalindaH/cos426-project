@@ -1,5 +1,5 @@
 To start developing: `npm start`
-To deploy: `npm run build && npm run deploy` and push to github again, the demo will be live [here](https://malindah.github.io/cos426-project/)
+To deploy: `npm run deploy`, the demo will be live [here](https://malindah.github.io/cos426-project/)
 
 
 
