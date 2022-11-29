@@ -1,4 +1,5 @@
-To start developing: `npm start`
+To start developing: `npm install && npm start`
+
 To deploy: `npm run deploy`, the demo will be live [here](https://malindah.github.io/cos426-project/)
 
 
