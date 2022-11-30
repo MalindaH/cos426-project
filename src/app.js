@@ -16,16 +16,17 @@ const near = 0.1;
 const far = 100;
 
 // Initialize core ThreeJS components
-const scene = new SeedScene();
+// const scene = new SeedScene();
 const camera = new PerspectiveCamera(fov, aspect, near, far);
 const renderer = new WebGLRenderer({ antialias: true });
 
 // Set up camera
-camera.position.set(-3, 10, -10);
+camera.position.set(-3, 15, -10);
 // camera.lookAt(new Vector3(0, 0, 0));
 
 // Set up renderer, canvas, and minor CSS adjustments
 renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
 const canvas = renderer.domElement;
 canvas.style.display = 'block'; // Removes padding below canvas
 document.body.style.margin = 0; // Removes margin around page
@@ -42,9 +43,12 @@ controls.maxPolarAngle = Math.PI/2; // don't allow camera to go below floor
 controls.target = new Vector3(0, 0, 5);
 controls.update();
 
+const scene = new SeedScene(camera, controls);
+
+
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
-    controls.update();
+    // controls.update();
     renderer.render(scene, camera);
     scene.update && scene.update(timeStamp);
     window.requestAnimationFrame(onAnimationFrameHandler);

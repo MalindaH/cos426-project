@@ -8,16 +8,18 @@ const floory = -1;
 const gridsize = 2;
 
 class SeedScene extends Scene {
-    constructor() {
+    constructor(camera, controls) {
         // Call parent Scene() constructor
         super();
 
         // Init state
         this.state = {
             gui: new Dat.GUI(), // Create GUI for scene
-            rotationSpeed: 1,
             updateList: [],
             character: null,
+            camera: camera,
+            controls: controls,
+            lights: null,
         };
 
         // Set background to a nice color
@@ -25,6 +27,8 @@ class SeedScene extends Scene {
 
         // Add meshes to scene
         const lights = new BasicLights();
+        this.state.lights = lights;
+        this.add(lights.state.dir.target);
 
         // Populate GUI
         this.state.gui.add(this.state, 'rotationSpeed', -5, 5);
@@ -35,6 +39,9 @@ class SeedScene extends Scene {
         this.state.character = character;
         const floor = this.makeFloor();
         this.add(lights, character, floor);
+
+        // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
+        // this.add(cameraHelper);
     }
 
     addToUpdateList(object) {
@@ -43,7 +50,6 @@ class SeedScene extends Scene {
 
     update(timeStamp) {
         const { updateList } = this.state;
-        // this.rotation.y = (rotationSpeed * timeStamp) / 10000;
 
         // Call update for each object in the updateList
         for (const obj of updateList) {
@@ -64,8 +70,9 @@ class SeedScene extends Scene {
     }
 
     populateScene() {
-        // add logs / cars / ...
+        // TODO: add logs / cars / ...
 
+        // placeholder cubes
         this.makeCube(0x44aa88, 0, 0);
         var curx = 0;
         var curz = 0;
@@ -98,21 +105,34 @@ class SeedScene extends Scene {
         const {character} = this.state;
         if (e.which == 87) { // w
             character.jump(0, gridsize);
-            // this.moveCamera(adjx, duration*ySpeed);
-            // this.moveLight(adjx, duration*ySpeed);
+            this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
             character.jump(gridsize, 0);
-            // const adjz = sphere.jump(duration*xSpeed, 0);
-            // this.moveCamera(duration*xSpeed, adjz);
-            // this.moveLight(duration*xSpeed, adjz);
+            this.moveCamera(gridsize, 0);
         } else if (e.which == 83) { // s
             character.jump(0, -gridsize);
-            // sphere.position.z -= duration*ySpeed;
+            this.moveCamera(0, -gridsize);
         }  else if (e.which == 68) { // d
             character.jump(-gridsize, 0);
-            // sphere.position.x -= duration*xSpeed;
+            this.moveCamera(-gridsize, 0);
         }
-    };
+    }
+
+    moveCamera(movex, movez) {
+        const {camera} = this.state;
+        camera.position.x += movex;
+        camera.position.z += movez;
+
+        this.moveLight(movex, movez);
+    }
+
+    moveLight(movex, movez) {
+        const {lights} = this.state;
+        lights.state.dir.position.x += movex;
+        lights.state.dir.position.z += movez;
+        lights.state.dir.target.position.x += movex;
+        lights.state.dir.target.position.z += movez;
+    }
 }
 
 export default SeedScene;
