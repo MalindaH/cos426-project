@@ -31,7 +31,7 @@ class SeedScene extends Scene {
         this.add(lights.state.dir.target);
 
         // Populate GUI
-        this.state.gui.add(this.state, 'rotationSpeed', -5, 5);
+        // this.state.gui.add(this.state, 'rotationSpeed', -5, 5);
 
         this.populateScene();
 
