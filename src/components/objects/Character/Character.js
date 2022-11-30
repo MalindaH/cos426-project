@@ -5,7 +5,7 @@ import * as THREE from 'three';
 // import MODEL from './flower.gltf';
 
 const floory = -1;
-const jumpTimeTotal = 20;
+const jumpTimeTotal = 15;
 
 class Character extends Group {
     constructor(parent) {
@@ -15,17 +15,12 @@ class Character extends Group {
         // Init state
         this.state = {
             gui: parent.state.gui,
-            // jump: this.jump.bind(this),
             jumping: false,
             jumpMovex: 0,
             jumpMovez: 0,
-            jumpAdjx: 0,
-            jumpAdjz: 0,
             jumpTimeTotal: 0,
             jumpTimeElapsed: 0,
             jumpSpeed: 0.2,
-            // cubes: parent.state.cubes,
-            // cubeIndex: 0,
         };
 
         // // Load object
@@ -70,47 +65,39 @@ class Character extends Group {
     }
 
     update(timeStamp) {
-        if(!this.state.jumping && (this.state.jumpMovex>0 || this.state.jumpMovez>0)) {
+        const EPS = 0.001;
+        if(!this.state.jumping && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
             this.state.jumping = true;
-            // console.log("movex:",this.state.jumpMovex);
-            if(this.state.jumpMovex>0) {
-                // this.state.jumpTimeTotal = this.state.jumpMovex/speed;
+            if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
                 this.state.jumpSpeed = this.state.jumpMovex/jumpTimeTotal;
                 this.position.x += this.state.jumpSpeed;
                 this.state.jumpMovex -= this.state.jumpSpeed;
-                this.position.z += this.state.jumpAdjz;
-                this.state.jumpAdjz = 0;
             }
-            if(this.state.jumpMovez>0) {
-                // this.state.jumpTimeTotal = this.state.jumpMovez/speed;
+            if(this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS) {
                 this.state.jumpSpeed = this.state.jumpMovez/jumpTimeTotal;
                 this.position.z += this.state.jumpSpeed;
                 this.state.jumpMovez -= this.state.jumpSpeed;
-                this.position.x += this.state.jumpAdjx;
-                this.state.jumpAdjx = 0;
             }
             this.state.jumpTimeElapsed += 1;
             this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
         }
         else if(this.state.jumping) {
-            if(this.state.jumpMovex<=0 && this.state.jumpMovez<=0) {
+            if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
                 this.state.jumping = false;
                 this.state.jumpTime = 0;
                 this.state.jumpTimeElapsed = 0;
-                // this.state.jumpLen = 0;
-                // console.log("stop");
+                this.state.jumpMovex = 0;
+                this.state.jumpMovez = 0;
                 this.state.cubeIndex++;
                 this.checkLand();
             } else {
                 this.state.jumpTimeElapsed += 1;
-                // this.rotation.x = timeStamp * 4;
                 this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
-                // this.position.z = Math.cos(timeStamp) * 4;
-                if(this.state.jumpMovex>0) {
+                if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
                     this.position.x += this.state.jumpSpeed;
                     this.state.jumpMovex -= this.state.jumpSpeed;
                 }
-                if(this.state.jumpMovez>0) {
+                if(this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS) {
                     this.position.z += this.state.jumpSpeed;
                     this.state.jumpMovez -= this.state.jumpSpeed;
                 }

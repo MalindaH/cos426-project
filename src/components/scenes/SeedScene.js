@@ -42,13 +42,13 @@ class SeedScene extends Scene {
     }
 
     update(timeStamp) {
-        // const { rotationSpeed, updateList } = this.state;
+        const { updateList } = this.state;
         // this.rotation.y = (rotationSpeed * timeStamp) / 10000;
 
-        // // Call update for each object in the updateList
-        // for (const obj of updateList) {
-        //     obj.update(timeStamp);
-        // }
+        // Call update for each object in the updateList
+        for (const obj of updateList) {
+            obj.update(timeStamp);
+        }
     }
 
     makeFloor() {
@@ -95,19 +95,21 @@ class SeedScene extends Scene {
     }
 
     onDocumentKeyDown(e) {
+        const {character} = this.state;
         if (e.which == 87) { // w
-            // // sphere.position.z += duration*ySpeed;
-            // const adjx = sphere.jump(0, duration*ySpeed);
+            character.jump(0, gridsize);
             // this.moveCamera(adjx, duration*ySpeed);
             // this.moveLight(adjx, duration*ySpeed);
         } else if (e.which == 65) { // a 
-            // // sphere.position.x += duration*xSpeed;
+            character.jump(gridsize, 0);
             // const adjz = sphere.jump(duration*xSpeed, 0);
             // this.moveCamera(duration*xSpeed, adjz);
             // this.moveLight(duration*xSpeed, adjz);
         } else if (e.which == 83) { // s
+            character.jump(0, -gridsize);
             // sphere.position.z -= duration*ySpeed;
         }  else if (e.which == 68) { // d
+            character.jump(-gridsize, 0);
             // sphere.position.x -= duration*xSpeed;
         }
     };
