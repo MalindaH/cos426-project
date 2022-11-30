@@ -8,7 +8,7 @@ const floory = -1;
 const gridsize = 2;
 
 class SeedScene extends Scene {
-    constructor(camera, controls) {
+    constructor(camera) {
         // Call parent Scene() constructor
         super();
 
@@ -18,7 +18,7 @@ class SeedScene extends Scene {
             updateList: [],
             character: null,
             camera: camera,
-            controls: controls,
+            // controls: controls,
             lights: null,
         };
 
@@ -83,9 +83,9 @@ class SeedScene extends Scene {
     }
 
     makeCube(color, x, z) {
-        const boxWidth = gridsize-0.1;
+        const boxWidth = gridsize-0.3;
         const boxHeight = 1;
-        const boxDepth = gridsize-0.1;
+        const boxDepth = gridsize-0.3;
         const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
         const material = new THREE.MeshPhongMaterial({color});
        
@@ -104,6 +104,7 @@ class SeedScene extends Scene {
     onDocumentKeyDown(e) {
         const {character} = this.state;
         if (e.which == 87) { // w
+            console.log("w");
             character.jump(0, gridsize);
             this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
