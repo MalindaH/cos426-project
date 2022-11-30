@@ -56,7 +56,7 @@ class Character extends Group {
         const sphere = new THREE.Mesh(geometry, material);
 
         sphere.position.x = x;
-        sphere.position.y = floory+3+radius;
+        sphere.position.y = floory+radius+1;
         sphere.position.z = z;
         sphere.castShadow = true;
         sphere.receiveShadow = true;

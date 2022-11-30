@@ -93,6 +93,24 @@ class SeedScene extends Scene {
 
         return cube;
     }
+
+    onDocumentKeyDown(e) {
+        if (e.which == 87) { // w
+            // // sphere.position.z += duration*ySpeed;
+            // const adjx = sphere.jump(0, duration*ySpeed);
+            // this.moveCamera(adjx, duration*ySpeed);
+            // this.moveLight(adjx, duration*ySpeed);
+        } else if (e.which == 65) { // a 
+            // // sphere.position.x += duration*xSpeed;
+            // const adjz = sphere.jump(duration*xSpeed, 0);
+            // this.moveCamera(duration*xSpeed, adjz);
+            // this.moveLight(duration*xSpeed, adjz);
+        } else if (e.which == 83) { // s
+            // sphere.position.z -= duration*ySpeed;
+        }  else if (e.which == 68) { // d
+            // sphere.position.x -= duration*xSpeed;
+        }
+    };
 }
 
 export default SeedScene;
