@@ -1,11 +1,13 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
 import { Flower, Land, Character } from 'objects';
-import { BasicLights } from 'lights';
+import { BasicLights, OrthoCamera } from 'lights';
+// import { OrthoCamera } from 'cameras';
 import * as THREE from 'three';
 
 const floory = -1;
 const gridsize = 2;
+const cameraForwardSpeed = 0.01*gridsize;
 
 class SeedScene extends Scene {
     constructor(camera) {
@@ -18,7 +20,9 @@ class SeedScene extends Scene {
             updateList: [],
             character: null,
             camera: camera,
-            // controls: controls,
+            cameraOrigX: camera.position.x,
+            cameraOrigY: camera.position.y,
+            cameraOrigZ: camera.position.z,
             lights: null,
         };
 
@@ -40,8 +44,8 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
-        // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
-        // this.add(cameraHelper);
+        const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
+        this.add(cameraHelper);
     }
 
     addToUpdateList(object) {
@@ -51,6 +55,7 @@ class SeedScene extends Scene {
     update(timeStamp) {
         const { updateList } = this.state;
 
+        this.cameraMovement();
         // Call update for each object in the updateList
         for (const obj of updateList) {
             obj.update(timeStamp);
@@ -73,12 +78,16 @@ class SeedScene extends Scene {
         // TODO: add logs / cars / ...
 
         // placeholder cubes
-        this.makeCube(0x44aa88, 0, 0);
-        var curx = 0;
+        var curx = -20;
         var curz = 0;
         for (var i = 0; i<10; i++) {
-            curz += gridsize;
             this.makeCube(0x44aa88, curx, curz);
+            for(var j=0; j<20; j++) {
+                curx += gridsize;
+                this.makeCube(0x44aa88, curx, curz);
+            }
+            curz += gridsize;
+            curx=-20;
         }
     }
 
@@ -104,28 +113,48 @@ class SeedScene extends Scene {
     onDocumentKeyDown(e) {
         const {character} = this.state;
         if (e.which == 87) { // w
-            console.log("w");
-            character.jump(0, gridsize);
-            this.moveCamera(0, gridsize);
+            character.addToJumpQueue(1);
+            // character.jump(0, gridsize);
+            // this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
-            character.jump(gridsize, 0);
-            this.moveCamera(gridsize, 0);
+            character.addToJumpQueue(2);
+            // character.jump(gridsize, 0);
+            // this.moveCamera(gridsize, 0);
         } else if (e.which == 83) { // s
-            character.jump(0, -gridsize);
-            this.moveCamera(0, -gridsize);
+            character.addToJumpQueue(3);
+            // character.jump(0, -gridsize);
+            // this.moveCamera(0, -gridsize);
         }  else if (e.which == 68) { // d
-            character.jump(-gridsize, 0);
-            this.moveCamera(-gridsize, 0);
+            character.addToJumpQueue(4);
+            // character.jump(-gridsize, 0);
+            // this.moveCamera(-gridsize, 0);
         }
     }
 
-    moveCamera(movex, movez) {
-        const {camera} = this.state;
-        camera.position.x += movex;
-        camera.position.z += movez;
+    cameraMovement() {
+        const {camera, character, cameraOrigX, cameraOrigY, cameraOrigZ} = this.state;
+        // constantly move forward
+        camera.position.z += cameraForwardSpeed;
+        this.moveLight(0, cameraForwardSpeed);
 
-        this.moveLight(movex, movez);
+        // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
+        const distX = camera.position.x - cameraOrigX - character.position.x;
+        const distZ = camera.position.z - cameraOrigZ - character.position.z;
+        // distance between them --> speed
+        const speedX = -distX/100;
+        const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
+        camera.position.x += speedX;
+        camera.position.z += speedZ;
+        this.moveLight(speedX, speedZ);
     }
+
+    // moveCamera(movex, movez) {
+    //     const {camera} = this.state;
+    //     camera.position.x += movex;
+    //     camera.position.z += movez;
+    //     console.log(camera.position);
+    //     this.moveLight(movex, movez);
+    // }
 
     moveLight(movex, movez) {
         const {lights} = this.state;
