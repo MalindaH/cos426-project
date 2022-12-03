@@ -21,7 +21,7 @@ class SeedScene extends Scene {
             character: null,
             camera: camera,
             cameraOrigX: camera.position.x,
-            cameraOrigY: camera.position.y,
+            // cameraOrigY: camera.position.y,
             cameraOrigZ: camera.position.z,
             lights: null,
         };
@@ -44,8 +44,8 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
-        const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
-        this.add(cameraHelper);
+        // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
+        // this.add(cameraHelper);
     }
 
     addToUpdateList(object) {
@@ -114,25 +114,17 @@ class SeedScene extends Scene {
         const {character} = this.state;
         if (e.which == 87) { // w
             character.addToJumpQueue(1);
-            // character.jump(0, gridsize);
-            // this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
             character.addToJumpQueue(2);
-            // character.jump(gridsize, 0);
-            // this.moveCamera(gridsize, 0);
         } else if (e.which == 83) { // s
             character.addToJumpQueue(3);
-            // character.jump(0, -gridsize);
-            // this.moveCamera(0, -gridsize);
         }  else if (e.which == 68) { // d
             character.addToJumpQueue(4);
-            // character.jump(-gridsize, 0);
-            // this.moveCamera(-gridsize, 0);
         }
     }
 
     cameraMovement() {
-        const {camera, character, cameraOrigX, cameraOrigY, cameraOrigZ} = this.state;
+        const {camera, character, cameraOrigX, cameraOrigZ} = this.state;
         // constantly move forward
         camera.position.z += cameraForwardSpeed;
         this.moveLight(0, cameraForwardSpeed);
@@ -140,7 +132,7 @@ class SeedScene extends Scene {
         // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
         const distX = camera.position.x - cameraOrigX - character.position.x;
         const distZ = camera.position.z - cameraOrigZ - character.position.z;
-        // distance between them --> speed
+        // distance between them -> speed
         const speedX = -distX/100;
         const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
         camera.position.x += speedX;
