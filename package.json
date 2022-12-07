@@ -1,6 +1,6 @@
 {
   "name": "lower-case-dashed-name-of-project",
-  "repository": "cos426-project",
+  "repository": "REPOSITORY-NAME-AS-IT-APPEARS-IN-GITHUB-URL",
   "version": "0.1.0",
   "title": "PROJECT TITLE HERE",
   "description": "SHORT DESCRIPTION OF PROJECT HERE. ONE TO TWO SENTENCES MAX",
@@ -24,9 +24,8 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.7",
-    "three": "^0.116.0",
-    "three-obj-loader": "^1.1.3",
-    "webpack-cli": "^3.3.11"
+    "three": "^0.146.0",
+    "three-obj-loader": "^1.1.3"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
@@ -34,13 +33,14 @@
     "babel-loader": "^8.1.0",
     "file-loader": "^6.0.0",
     "gh-pages": "^2.2.0",
-    "html-webpack-plugin": "^4.3.0",
+    "html-webpack-plugin": "^4.5.2",
     "mkdirp": "^1.0.4",
     "prettier": "^2.0.5",
     "raw-loader": "^4.0.1",
     "rimraf": "^3.0.2",
-    "webpack": "^4.43.0",
-    "webpack-dev-server": "^3.10.3"
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
   },
   "engines": {
     "node": ">=8.0.0"

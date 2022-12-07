@@ -1,4 +1,4 @@
-import { Group } from 'three';
+import { DoubleSide, Group, Scene } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
@@ -6,6 +6,7 @@ import * as THREE from 'three';
 
 const floory = -1;
 const jumpTimeTotal = 15;
+const gridsize = 2;
 
 class Character extends Group {
     constructor(parent) {
@@ -21,6 +22,10 @@ class Character extends Group {
             jumpTimeTotal: 0,
             jumpTimeElapsed: 0,
             jumpSpeed: 0.2,
+            xPos: 0,
+            zPos: 0,
+            hitBox: null,
+            visualBox: null,
         };
 
         // // Load object
@@ -31,7 +36,19 @@ class Character extends Group {
         //     this.add(gltf.scene);
         // });
 
-        this.add(this.makeSphere(0xaa33aa, 0, 0));
+        // Create Sphere
+        var sphere = this.makeSphere(0xaa33aa, 0, 0);
+        this.add(sphere);
+
+        // Create hitBox from sphere and attach to character
+        var hitBox = new THREE.Box3().setFromObject(sphere);
+        hitBox.expandByVector(new THREE.Vector3(0, 0.01, 0));
+        this.state.hitBox = hitBox;
+
+        // HITBOX VISUAL
+        var visualBox = new THREE.Box3Helper(hitBox);
+        this.state.visualBox = visualBox;
+        this.add(visualBox);
 
         // Add self to parent's update list
         parent.addToUpdateList(this);

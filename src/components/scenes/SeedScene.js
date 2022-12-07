@@ -8,7 +8,7 @@ const floory = -1;
 const gridsize = 2;
 
 class SeedScene extends Scene {
-    constructor(camera) {
+    constructor(camera, controls) {
         // Call parent Scene() constructor
         super();
 
@@ -18,8 +18,9 @@ class SeedScene extends Scene {
             updateList: [],
             character: null,
             camera: camera,
-            // controls: controls,
+            controls: controls,
             lights: null,
+            floorHitBox:[],
         };
 
         // Set background to a nice color
@@ -55,6 +56,47 @@ class SeedScene extends Scene {
         for (const obj of updateList) {
             obj.update(timeStamp);
         }
+        
+        var isColliding = false;
+        var isJumping = this.state.character.state.jumping;
+        // Reset visual of character hitbox
+        if(isColliding && isJumping) {
+            isColliding = false;
+            char = this.state.character.state;
+            char.visualBox = new THREE.Box3Helper(char.hitBox);
+            this.state.character.add(char.visualBox);
+        }
+
+        // Check for collision
+        if(!isJumping){
+            var x = Math.ceil(this.state.character.position.x);//this.state.character.state.xPos;
+            var z = Math.ceil(this.state.character.position.z);//this.state.character.state.zPos;
+            console.log('x:', x);
+            console.log('z:', z);
+            if(x < 0 || z < 0) {
+                debugger;
+            }
+            var beneathHitBox = this.state.floorHitBox[0][0];
+            var charHitBox = this.state.character.state.hitBox;
+            var isInterecting = charHitBox.intersectsBox(beneathHitBox.hitBox);
+            if(beneathHitBox == undefined) {
+                debugger;
+            }
+            if(isInterecting){
+                isColliding = true;
+                var visualBox
+                // White outline for grass, red for water
+                if(beneathHitBox.type == "grass") {
+                    visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
+                }
+                else if(beneathHitBox.type == "water"){ 
+                    visualBox = new THREE.Box3Helper(charHitBox, 0xff0000);
+                }
+                this.state.character.state.visualBox = visualBox;
+                this.state.character.add(visualBox);
+            }
+        }
+        
     }
 
     makeFloor() {
@@ -76,16 +118,39 @@ class SeedScene extends Scene {
         this.makeCube(0x44aa88, 0, 0);
         var curx = 0;
         var curz = 0;
-        for (var i = 0; i<10; i++) {
-            curz += gridsize;
-            this.makeCube(0x44aa88, curx, curz);
+        for (var i = 0; i < 10; i++) {
+            var hitBoxArray = [];
+            for(var j = 0; j < 5; j++) {
+                // Alternate between grass and water
+                var cube, type;
+                if(i % 2 == 0){
+                    cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
+                    type = "grass";
+                }
+                else {
+                    cube = this.makeCube(0x2300ff , i * gridsize, j * gridsize);
+                    type = "water";
+                }
+
+                // Floor cube hitBox
+                var hitBox = new THREE.Box3().setFromObject(cube);
+
+                // HITBOX VISUAL
+                var visualBox = new THREE.Box3Helper(hitBox/*, HEX COLOR TO CHANGE BOX COLOR*/);
+                this.add(visualBox);
+
+                // Add row of hitboxes and type of floor (maybe "floor" for non-game ending stuff like grass and
+                // roads, then "water", "lava", etc.)
+                hitBoxArray.push({hitBox: hitBox, type: type});
+            }
+            this.state.floorHitBox.push(hitBoxArray);
         }
     }
 
     makeCube(color, x, z) {
-        const boxWidth = gridsize-0.3;
+        const boxWidth = gridsize-0.1;
         const boxHeight = 1;
-        const boxDepth = gridsize-0.3;
+        const boxDepth = gridsize-0.1;
         const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
         const material = new THREE.MeshPhongMaterial({color});
        
@@ -104,7 +169,6 @@ class SeedScene extends Scene {
     onDocumentKeyDown(e) {
         const {character} = this.state;
         if (e.which == 87) { // w
-            console.log("w");
             character.jump(0, gridsize);
             this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
