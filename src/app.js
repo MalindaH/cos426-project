@@ -6,9 +6,11 @@
  * handles window resizes.
  *
  */
-import { WebGLRenderer, PerspectiveCamera, Vector3 } from 'three';
+import { WebGLRenderer, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { SeedScene } from 'scenes';
+// import { OrthoCamera } from 'lights';
+import * as THREE from 'three';
 
 const fov = 60;
 const aspect = 2;  // the canvas default
@@ -17,12 +19,13 @@ const far = 100;
 
 // Initialize core ThreeJS components
 // const scene = new SeedScene();
-const camera = new PerspectiveCamera(fov, aspect, near, far);
+// const camera = new OrthoCamera(frustumSize, aspect).state.cam;
 const renderer = new WebGLRenderer({ antialias: true });
 
 // Set up camera
-camera.position.set(-3, 15, -10);
-// camera.lookAt(new Vector3(0, 0, 0));
+const camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -100, 3000);
+camera.position.set(-3,7,-5);
+camera.zoom = 80;
 
 // Set up renderer, canvas, and minor CSS adjustments
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -37,14 +40,15 @@ document.body.appendChild(canvas);
 const controls = new OrbitControls(camera, canvas);
 // controls.enableDamping = true;
 controls.enablePan = true;
-controls.minDistance = 4;
-controls.maxDistance = 16;
+// controls.minDistance = 4;
+// controls.maxDistance = 16;
 controls.maxPolarAngle = Math.PI/2; // don't allow camera to go below floor
 controls.target = new Vector3(0, 0, 5);
 controls.update();
 
-const scene = new SeedScene(camera, controls);
-
+const scene = new SeedScene(camera);
+scene.add(camera);
+// // camera.lookAt( scene.position );
 
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
