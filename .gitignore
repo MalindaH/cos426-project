@@ -106,5 +106,3 @@ dist
 .tern-port
 
 build/
-
-package.json

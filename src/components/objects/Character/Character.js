@@ -17,7 +17,6 @@ class Character extends Group {
         this.state = {
             gui: parent.state.gui,
             jumping: false,
-            jumpQueue: [],
             jumpMovex: 0,
             jumpMovez: 0,
             jumpTimeTotal: 0,
@@ -77,40 +76,12 @@ class Character extends Group {
         return sphere;
     }
 
-    addToJumpQueue(direction) {
-        if(this.state.jumpQueue.length<3) {
-            this.state.jumpQueue.push(direction);
-        }
-    }
-
     jump(movex, movez) {
-        // character only allowed to reach -6 to +6 grids (jump 5 times from center)
-        if(this.position.x + movex >= -6*gridsize && this.position.x + movex <= 6*gridsize && this.position.z + movez >= 0) {
-            this.state.jumpMovex = movex;
-            this.state.jumpMovez = movez;
-        }
+        this.state.jumpMovex = movex;
+        this.state.jumpMovez = movez;
     }
 
     update(timeStamp) {
-        // add jump from queue
-        if(!this.state.jumping && this.state.jumpQueue.length>0) {
-            switch(this.state.jumpQueue.shift()) { // deletes first element from array
-                case 1: //"forward"
-                    this.jump(0, gridsize);
-                    break;
-                case 2: //"left"
-                    this.jump(gridsize, 0);
-                    break;
-                case 3: //"backward"
-                    this.jump(0, -gridsize);
-                    break;
-                case 4: //"right"
-                    this.jump(-gridsize, 0);
-                    break;
-            }
-        }
-
-        // execute jump animation
         const EPS = 0.001;
         if(!this.state.jumping && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
             this.state.jumping = true;

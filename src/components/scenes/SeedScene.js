@@ -1,13 +1,11 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
 import { Flower, Land, Character } from 'objects';
-import { BasicLights, OrthoCamera } from 'lights';
-// import { OrthoCamera } from 'cameras';
+import { BasicLights } from 'lights';
 import * as THREE from 'three';
 
 const floory = -1;
 const gridsize = 2;
-const cameraForwardSpeed = 0.01*gridsize;
 
 class SeedScene extends Scene {
     constructor(camera, controls) {
@@ -20,9 +18,7 @@ class SeedScene extends Scene {
             updateList: [],
             character: null,
             camera: camera,
-            cameraOrigX: camera.position.x,
-            // cameraOrigY: camera.position.y,
-            cameraOrigZ: camera.position.z,
+            controls: controls,
             lights: null,
             floorHitBox:[],
         };
@@ -56,7 +52,6 @@ class SeedScene extends Scene {
     update(timeStamp) {
         const { updateList } = this.state;
 
-        this.cameraMovement();
         // Call update for each object in the updateList
         for (const obj of updateList) {
             obj.update(timeStamp);
@@ -120,7 +115,8 @@ class SeedScene extends Scene {
         // TODO: add logs / cars / ...
 
         // placeholder cubes
-        var curx = -20;
+        this.makeCube(0x44aa88, 0, 0);
+        var curx = 0;
         var curz = 0;
         for (var i = 0; i < 10; i++) {
             var hitBoxArray = [];
@@ -173,40 +169,27 @@ class SeedScene extends Scene {
     onDocumentKeyDown(e) {
         const {character} = this.state;
         if (e.which == 87) { // w
-            character.addToJumpQueue(1);
+            character.jump(0, gridsize);
+            this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
-            character.addToJumpQueue(2);
+            character.jump(gridsize, 0);
+            this.moveCamera(gridsize, 0);
         } else if (e.which == 83) { // s
-            character.addToJumpQueue(3);
+            character.jump(0, -gridsize);
+            this.moveCamera(0, -gridsize);
         }  else if (e.which == 68) { // d
-            character.addToJumpQueue(4);
+            character.jump(-gridsize, 0);
+            this.moveCamera(-gridsize, 0);
         }
     }
 
-    cameraMovement() {
-        const {camera, character, cameraOrigX, cameraOrigZ} = this.state;
-        // constantly move forward
-        camera.position.z += cameraForwardSpeed;
-        this.moveLight(0, cameraForwardSpeed);
+    moveCamera(movex, movez) {
+        const {camera} = this.state;
+        camera.position.x += movex;
+        camera.position.z += movez;
 
-        // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
-        const distX = camera.position.x - cameraOrigX - character.position.x;
-        const distZ = camera.position.z - cameraOrigZ - character.position.z;
-        // distance between them -> speed
-        const speedX = -distX/100;
-        const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
-        camera.position.x += speedX;
-        camera.position.z += speedZ;
-        this.moveLight(speedX, speedZ);
+        this.moveLight(movex, movez);
     }
-
-    // moveCamera(movex, movez) {
-    //     const {camera} = this.state;
-    //     camera.position.x += movex;
-    //     camera.position.z += movez;
-    //     console.log(camera.position);
-    //     this.moveLight(movex, movez);
-    // }
 
     moveLight(movex, movez) {
         const {lights} = this.state;
