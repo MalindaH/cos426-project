@@ -44,6 +44,9 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
+        // const flower = new Flower();
+        // this.add(flower);
+
         // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
         // this.add(cameraHelper);
     }
@@ -54,7 +57,7 @@ class SeedScene extends Scene {
 
     update(timeStamp) {
         const { updateList } = this.state;
-
+        // console.log(this.state.character.position);
         this.cameraMovement();
         // Call update for each object in the updateList
         for (const obj of updateList) {
@@ -126,8 +129,8 @@ class SeedScene extends Scene {
     cameraMovement() {
         const {camera, character, cameraOrigX, cameraOrigZ} = this.state;
         // constantly move forward
-        camera.position.z += cameraForwardSpeed;
-        this.moveLight(0, cameraForwardSpeed);
+        // camera.position.z += cameraForwardSpeed;
+        // this.moveLight(0, cameraForwardSpeed);
 
         // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
         const distX = camera.position.x - cameraOrigX - character.position.x;

@@ -2,7 +2,7 @@ import { Group } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
-// import MODEL from './flower.gltf';
+// import MODEL from './mallard/scene.gltf';
 
 const floory = -1;
 const jumpTimeTotal = 15;
@@ -23,17 +23,22 @@ class Character extends Group {
             jumpTimeTotal: 0,
             jumpTimeElapsed: 0,
             jumpSpeed: 0.2,
+            sqeeze: 0,
+            unsqeeze: 0,
         };
 
-        // // Load object
-        // const loader = new GLTFLoader();
+        // Load object
+        const loader = new GLTFLoader();
 
-        // this.name = 'flower';
-        // loader.load(MODEL, (gltf) => {
-        //     this.add(gltf.scene);
-        // });
+        loader.load('./src/gltf/mallard/scene.gltf', (gltf) => {
+            this.add(gltf.scene);
+            gltf.scene.traverse( function( node ) {
+                if ( node.isMesh ) { node.castShadow = true; }
+            } );
+        
+        });
 
-        this.add(this.makeSphere(0xaa33aa, 0, 0));
+        // this.add(this.makeSphere(0xaa33aa, 0, 0));
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
@@ -69,34 +74,56 @@ class Character extends Group {
 
     jump(movex, movez) {
         // character only allowed to reach -6 to +6 grids (jump 5 times from center)
-        if(this.position.x + movex >= -6*gridsize && this.position.x + movex <= 6*gridsize && this.position.z + movez >= 0) {
+        const EPS = 0.001;
+        if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
             this.state.jumpMovex = movex;
             this.state.jumpMovez = movez;
         }
     }
 
     update(timeStamp) {
+        const EPS = 0.001;
+        if(this.state.sqeeze > EPS) {
+            this.state.sqeeze -= 0.1;
+            this.scale.set(1,this.scale.y-0.1,1);
+        }
+        if(this.state.sqeeze>-EPS && this.state.sqeeze<EPS && this.state.unsqeeze > EPS) {
+            this.state.unsqeeze -= 0.1;
+            this.scale.set(1,this.scale.y+0.1,1);
+        }
+
         // add jump from queue
         if(!this.state.jumping && this.state.jumpQueue.length>0) {
-            switch(this.state.jumpQueue.shift()) { // deletes first element from array
+            switch(this.state.jumpQueue.shift()) { // delete first element from array
                 case 1: //"forward"
+                    this.state.sqeeze=0.3; // lower a bit while turning, before jumping
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = 0;
                     this.jump(0, gridsize);
                     break;
                 case 2: //"left"
+                    this.state.sqeeze=0.3;
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = Math.PI/2;
                     this.jump(gridsize, 0);
                     break;
                 case 3: //"backward"
+                    this.state.sqeeze=0.3;
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = Math.PI;
                     this.jump(0, -gridsize);
                     break;
                 case 4: //"right"
+                    this.state.sqeeze=0.3;
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = -Math.PI/2;
                     this.jump(-gridsize, 0);
                     break;
             }
         }
 
         // execute jump animation
-        const EPS = 0.001;
-        if(!this.state.jumping && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
+        if(!this.state.jumping && this.state.unsqeeze>-EPS && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
             this.state.jumping = true;
             if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
                 this.state.jumpSpeed = this.state.jumpMovex/jumpTimeTotal;
@@ -110,8 +137,7 @@ class Character extends Group {
             }
             this.state.jumpTimeElapsed += 1;
             this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
-        }
-        else if(this.state.jumping) {
+        } else if(this.state.jumping) {
             if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
                 this.state.jumping = false;
                 this.state.jumpTime = 0;
@@ -132,7 +158,6 @@ class Character extends Group {
                     this.state.jumpMovez -= this.state.jumpSpeed;
                 }
             }
-
         }
 
         // Advance tween animations, if any exist
