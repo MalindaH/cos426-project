@@ -24,7 +24,8 @@ class SeedScene extends Scene {
             cameraOrigY: camera.position.y,
             cameraOrigZ: camera.position.z,
             lights: null,
-            floorHitBox:[],
+            floorHitBox: [],
+            visualCharHitBox: null,
         };
 
         // Set background to a nice color
@@ -40,8 +41,10 @@ class SeedScene extends Scene {
 
         this.populateScene();
 
+        // Character and hit box
         const character = new Character(this);
         this.state.character = character;
+
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
@@ -62,56 +65,7 @@ class SeedScene extends Scene {
             obj.update(timeStamp);
         }
         
-        var isColliding = false;
-        var isJumping = this.state.character.state.jumping;
-        // Reset visual of character hitbox
-        /*
-        if(isColliding && isJumping) {
-            isColliding = false;
-            char = this.state.character.state;
-            char.visualBox = new THREE.Box3Helper(char.hitBox);
-            this.state.character.add(char.visualBox);
-        }
-        */
-        
-        // Update hitBox
-        //this.updateHitBox();
-        
-        // Check for collision
-        if(!isJumping){
-            var x = Math.max(0, Math.ceil(Math.floor(this.state.character.position.x) / gridsize));//this.state.character.state.xPos;
-            var z = Math.max(0, Math.ceil(Math.floor(this.state.character.position.z) / gridsize));//this.state.character.state.zPos;
-            console.log('x:', x);
-            console.log('z:', z);
-            if(x < 0 || z < 0 || x > 9 || z > 9) {
-                debugger;
-            }
-            var beneathHitBox = this.state.floorHitBox[x][z];
-            var charHitBox = this.state.character.state.hitBox;
-            if(beneathHitBox == undefined) {
-                debugger;
-            }
-            var isInterecting = charHitBox.intersectsBox(beneathHitBox.hitBox);
-            console.log('intersecting?:', isInterecting);
-            console.log('hitbox center:', charHitBox.getCenter(new THREE.Vector3()));
-            if(isInterecting){
-                isColliding = true;
-                var visualBox
-                // White outline for grass, red for water
-                if(beneathHitBox.type === "grass") {
-                    visualBox = new THREE.Box3Helper(charHitBox, 0x0abcde/*0xffffff*/);
-                }
-                else if(beneathHitBox.type === "water"){ 
-                    visualBox = new THREE.Box3Helper(charHitBox, 0xff0000);
-                }
-                this.state.character.remove(this.state.character.state.visualBox);
-                this.state.character.state.visualBox = visualBox;
-                console.log('visual box center', visualBox.box.getCenter(new THREE.Vector3()));
-                this.state.character.add(visualBox);
-            }
-            console.log('floorHitBoxCenter:', beneathHitBox.hitBox.getCenter(new THREE.Vector3()));
-        }
-        console.log('sphere center:', this.state.character.position);
+        this.collisions();
         
     }
 
@@ -233,6 +187,48 @@ class SeedScene extends Scene {
         lights.state.dir.position.z += movez;
         lights.state.dir.target.position.x += movex;
         lights.state.dir.target.position.z += movez;
+    }
+
+    collisions() {
+        var isColliding = false;
+        var isJumping = this.state.character.state.jumping;
+        // Reset visual of character hitbox
+        // Check for collision
+        if(!isJumping){
+            var x = Math.max(0, Math.ceil(Math.floor(this.state.character.position.x) / gridsize));//this.state.character.state.xPos;
+            var z = Math.max(0, Math.ceil(Math.floor(this.state.character.position.z) / gridsize));//this.state.character.state.zPos;
+            console.log('x:', x);
+            console.log('z:', z);
+            if(x < 0 || z < 0 || x > 9 || z > 9) {
+                debugger;
+            }
+            var beneathHitBox = this.state.floorHitBox[x][z];
+            var charHitBox = this.state.character.state.hitBox;
+            if(beneathHitBox == undefined) {
+                debugger;
+            }
+            var isInterecting = charHitBox.intersectsBox(beneathHitBox.hitBox);
+            console.log('intersecting?:', isInterecting);
+            console.log('hitbox center:', charHitBox.getCenter(new THREE.Vector3()));
+            if(isInterecting){
+                isColliding = true;
+                var visualBox
+                // White outline for grass, red for water
+                if(beneathHitBox.type === "grass") {
+                    visualBox = new THREE.Box3Helper(charHitBox, 0x0abcde/*0xffffff*/);
+                }
+                else if(beneathHitBox.type === "water"){ 
+                    visualBox = new THREE.Box3Helper(charHitBox, 0xff0000);
+                }
+
+                this.remove(this.state.visualCharHitBox);
+                this.state.visualCharHitBox = visualBox;
+                console.log('visual box center', visualBox.box.getCenter(new THREE.Vector3()));
+                this.add(visualBox);
+            }
+            console.log('floorHitBoxCenter:', beneathHitBox.hitBox.getCenter(new THREE.Vector3()));
+        }
+        console.log('sphere center:', this.state.character.position);
     }
 }
 

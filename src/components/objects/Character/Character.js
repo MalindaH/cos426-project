@@ -48,11 +48,6 @@ class Character extends Group {
         hitBox.expandByVector(new THREE.Vector3(0, 0.6, 0));
         this.state.hitBox = hitBox;
 
-        // HITBOX VISUAL
-        var visualBox = new THREE.Box3Helper(hitBox);
-        this.state.visualBox = visualBox;
-        this.add(visualBox);
-
         // Add self to parent's update list
         parent.addToUpdateList(this);
 
