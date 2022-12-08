@@ -1,11 +1,13 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
 import { Flower, Land, Character } from 'objects';
-import { BasicLights } from 'lights';
+import { BasicLights, OrthoCamera } from 'lights';
+// import { OrthoCamera } from 'cameras';
 import * as THREE from 'three';
 
 const floory = -1;
 const gridsize = 2;
+const cameraForwardSpeed = 0.01*gridsize;
 
 class SeedScene extends Scene {
     constructor(camera, controls) {
@@ -18,7 +20,9 @@ class SeedScene extends Scene {
             updateList: [],
             character: null,
             camera: camera,
-            controls: controls,
+            cameraOrigX: camera.position.x,
+            cameraOrigY: camera.position.y,
+            cameraOrigZ: camera.position.z,
             lights: null,
             floorHitBox:[],
         };
@@ -41,8 +45,8 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
-        // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
-        // this.add(cameraHelper);
+        //const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
+        //this.add(cameraHelper);
     }
 
     addToUpdateList(object) {
@@ -52,6 +56,7 @@ class SeedScene extends Scene {
     update(timeStamp) {
         const { updateList } = this.state;
 
+        this.cameraMovement();
         // Call update for each object in the updateList
         for (const obj of updateList) {
             obj.update(timeStamp);
@@ -60,42 +65,53 @@ class SeedScene extends Scene {
         var isColliding = false;
         var isJumping = this.state.character.state.jumping;
         // Reset visual of character hitbox
+        /*
         if(isColliding && isJumping) {
             isColliding = false;
             char = this.state.character.state;
             char.visualBox = new THREE.Box3Helper(char.hitBox);
             this.state.character.add(char.visualBox);
         }
-
+        */
+        
+        // Update hitBox
+        //this.updateHitBox();
+        
         // Check for collision
         if(!isJumping){
-            var x = Math.ceil(this.state.character.position.x);//this.state.character.state.xPos;
-            var z = Math.ceil(this.state.character.position.z);//this.state.character.state.zPos;
+            var x = Math.max(0, Math.ceil(Math.floor(this.state.character.position.x) / gridsize));//this.state.character.state.xPos;
+            var z = Math.max(0, Math.ceil(Math.floor(this.state.character.position.z) / gridsize));//this.state.character.state.zPos;
             console.log('x:', x);
             console.log('z:', z);
-            if(x < 0 || z < 0) {
+            if(x < 0 || z < 0 || x > 9 || z > 9) {
                 debugger;
             }
-            var beneathHitBox = this.state.floorHitBox[0][0];
+            var beneathHitBox = this.state.floorHitBox[x][z];
             var charHitBox = this.state.character.state.hitBox;
-            var isInterecting = charHitBox.intersectsBox(beneathHitBox.hitBox);
             if(beneathHitBox == undefined) {
                 debugger;
             }
+            var isInterecting = charHitBox.intersectsBox(beneathHitBox.hitBox);
+            console.log('intersecting?:', isInterecting);
+            console.log('hitbox center:', charHitBox.getCenter(new THREE.Vector3()));
             if(isInterecting){
                 isColliding = true;
                 var visualBox
                 // White outline for grass, red for water
-                if(beneathHitBox.type == "grass") {
-                    visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
+                if(beneathHitBox.type === "grass") {
+                    visualBox = new THREE.Box3Helper(charHitBox, 0x0abcde/*0xffffff*/);
                 }
-                else if(beneathHitBox.type == "water"){ 
+                else if(beneathHitBox.type === "water"){ 
                     visualBox = new THREE.Box3Helper(charHitBox, 0xff0000);
                 }
+                this.state.character.remove(this.state.character.state.visualBox);
                 this.state.character.state.visualBox = visualBox;
+                console.log('visual box center', visualBox.box.getCenter(new THREE.Vector3()));
                 this.state.character.add(visualBox);
             }
+            console.log('floorHitBoxCenter:', beneathHitBox.hitBox.getCenter(new THREE.Vector3()));
         }
+        console.log('sphere center:', this.state.character.position);
         
     }
 
@@ -115,8 +131,7 @@ class SeedScene extends Scene {
         // TODO: add logs / cars / ...
 
         // placeholder cubes
-        this.makeCube(0x44aa88, 0, 0);
-        var curx = 0;
+        var curx = -20;
         var curz = 0;
         for (var i = 0; i < 10; i++) {
             var hitBoxArray = [];
@@ -169,27 +184,48 @@ class SeedScene extends Scene {
     onDocumentKeyDown(e) {
         const {character} = this.state;
         if (e.which == 87) { // w
-            character.jump(0, gridsize);
-            this.moveCamera(0, gridsize);
+            character.addToJumpQueue(1);
+            // character.jump(0, gridsize);
+            // this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
-            character.jump(gridsize, 0);
-            this.moveCamera(gridsize, 0);
+            character.addToJumpQueue(2);
+            // character.jump(gridsize, 0);
+            // this.moveCamera(gridsize, 0);
         } else if (e.which == 83) { // s
-            character.jump(0, -gridsize);
-            this.moveCamera(0, -gridsize);
+            character.addToJumpQueue(3);
+            // character.jump(0, -gridsize);
+            // this.moveCamera(0, -gridsize);
         }  else if (e.which == 68) { // d
-            character.jump(-gridsize, 0);
-            this.moveCamera(-gridsize, 0);
+            character.addToJumpQueue(4);
+            // character.jump(-gridsize, 0);
+            // this.moveCamera(-gridsize, 0);
         }
     }
 
-    moveCamera(movex, movez) {
-        const {camera} = this.state;
-        camera.position.x += movex;
-        camera.position.z += movez;
+    cameraMovement() {
+        const {camera, character, cameraOrigX, cameraOrigY, cameraOrigZ} = this.state;
+        // constantly move forward
+        //camera.position.z += cameraForwardSpeed;
+        //this.moveLight(0, cameraForwardSpeed);
 
-        this.moveLight(movex, movez);
+        // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
+        const distX = camera.position.x - cameraOrigX - character.position.x;
+        const distZ = camera.position.z - cameraOrigZ - character.position.z;
+        // distance between them --> speed
+        const speedX = -distX/100;
+        const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
+        camera.position.x += speedX;
+        camera.position.z += speedZ;
+        this.moveLight(speedX, speedZ);
     }
+
+    // moveCamera(movex, movez) {
+    //     const {camera} = this.state;
+    //     camera.position.x += movex;
+    //     camera.position.z += movez;
+    //     console.log(camera.position);
+    //     this.moveLight(movex, movez);
+    // }
 
     moveLight(movex, movez) {
         const {lights} = this.state;
