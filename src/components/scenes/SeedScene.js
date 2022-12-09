@@ -10,7 +10,7 @@ const gridsize = 2;
 const cameraForwardSpeed = 0.01*gridsize;
 
 class SeedScene extends Scene {
-    constructor(camera) {
+    constructor(camera1, camera2) {
         // Call parent Scene() constructor
         super();
 
@@ -19,10 +19,9 @@ class SeedScene extends Scene {
             gui: new Dat.GUI(), // Create GUI for scene
             updateList: [],
             character: null,
-            camera: camera,
-            cameraOrigX: camera.position.x,
-            // cameraOrigY: camera.position.y,
-            cameraOrigZ: camera.position.z,
+            cameras: [camera1, camera2],
+            camerasOrigX: [camera1.position.x, camera2.position.x],
+            camerasOrigZ: [camera1.position.z, camera2.position.z],
             lights: null,
         };
 
@@ -57,7 +56,7 @@ class SeedScene extends Scene {
 
     update(timeStamp) {
         const { updateList } = this.state;
-        // console.log(this.state.character.position);
+
         this.cameraMovement();
         // Call update for each object in the updateList
         for (const obj of updateList) {
@@ -69,10 +68,15 @@ class SeedScene extends Scene {
         const width = 900;
         const height = 900;
         var geometry = new THREE.PlaneGeometry(width, height);
-        const material = new THREE.MeshPhongMaterial({color: "#36abff", side: THREE.DoubleSide});
+        const texture = new THREE.TextureLoader().load( './src/textures/water.png' );
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(100,50);
+        const material = new THREE.MeshPhongMaterial( { map: texture} );
+        // const material = new THREE.MeshPhongMaterial({color: "#36abff", side: THREE.DoubleSide});
         const plane = new THREE.Mesh( geometry, material );
         plane.position.y = floory;
-        plane.rotation.x = Math.PI/2;
+        plane.rotation.x = -Math.PI/2;
         plane.receiveShadow = true;
         return plane;
     }
@@ -127,29 +131,27 @@ class SeedScene extends Scene {
     }
 
     cameraMovement() {
-        const {camera, character, cameraOrigX, cameraOrigZ} = this.state;
-        // constantly move forward
-        // camera.position.z += cameraForwardSpeed;
-        // this.moveLight(0, cameraForwardSpeed);
+        const {cameras, character, camerasOrigX, camerasOrigZ} = this.state;
+        for(let ii=0; ii<cameras.length; ii++) {
+            const camera = cameras[ii];
+            // constantly move forward
+            // camera.position.z += cameraForwardSpeed;
+            // this.moveLight(0, cameraForwardSpeed);
 
-        // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
-        const distX = camera.position.x - cameraOrigX - character.position.x;
-        const distZ = camera.position.z - cameraOrigZ - character.position.z;
-        // distance between them -> speed
-        const speedX = -distX/100;
-        const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
-        camera.position.x += speedX;
-        camera.position.z += speedZ;
-        this.moveLight(speedX, speedZ);
+            // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
+            const distX = camera.position.x - camerasOrigX[ii] - character.position.x;
+            const distZ = camera.position.z - camerasOrigZ[ii] - character.position.z;
+            // distance between them to get speed
+            const speedX = -distX/100;
+            const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
+            camera.position.x += speedX;
+            camera.position.z += speedZ;
+            if(ii==0) {
+                this.moveLight(speedX, speedZ);
+            }
+        }
+        
     }
-
-    // moveCamera(movex, movez) {
-    //     const {camera} = this.state;
-    //     camera.position.x += movex;
-    //     camera.position.z += movez;
-    //     console.log(camera.position);
-    //     this.moveLight(movex, movez);
-    // }
 
     moveLight(movex, movez) {
         const {lights} = this.state;
