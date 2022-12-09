@@ -123,7 +123,6 @@ function render() {
         renderer.render( scene, camera );
 
     }
-    // console.log(views[1].camera);
 }
 
 // Render loop

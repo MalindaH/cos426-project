@@ -8,6 +8,7 @@ import * as THREE from 'three';
 const floory = -1;
 const gridsize = 2;
 const cameraForwardSpeed = 0.01*gridsize;
+const camerasFollowTime = [100, 50];
 
 class SeedScene extends Scene {
     constructor(camera1, camera2) {
@@ -142,8 +143,8 @@ class SeedScene extends Scene {
             const distX = camera.position.x - camerasOrigX[ii] - character.position.x;
             const distZ = camera.position.z - camerasOrigZ[ii] - character.position.z;
             // distance between them to get speed
-            const speedX = -distX/100;
-            const speedZ = Math.max(0,-distZ/100); // camera doesn't move backwards
+            const speedX = -distX/camerasFollowTime[ii];
+            const speedZ = Math.max(0,-distZ/camerasFollowTime[ii]); // camera doesn't move backwards
             camera.position.x += speedX;
             camera.position.z += speedZ;
             if(ii==0) {
