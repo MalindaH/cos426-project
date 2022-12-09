@@ -24,8 +24,9 @@ class SeedScene extends Scene {
             cameraOrigY: camera.position.y,
             cameraOrigZ: camera.position.z,
             lights: null,
-            floorHitBox: [],
+            floorType: [],
             visualCharHitBox: null,
+            cars: [],
         };
 
         // Set background to a nice color
@@ -48,6 +49,9 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
+        // Add oscillating "car"
+        this.spawnCar(5, 2);
+
         //const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
         //this.add(cameraHelper);
     }
@@ -65,7 +69,12 @@ class SeedScene extends Scene {
             obj.update(timeStamp);
         }
         
-        this.collisions();
+        this.checkFloor();
+        
+        this.updateCars(timeStamp);
+
+        this.checkCollisions();
+        //this.collisions();
         
     }
 
@@ -101,18 +110,21 @@ class SeedScene extends Scene {
                     type = "water";
                 }
 
+                // Floor does not need hit box
+                /*
                 // Floor cube hitBox
                 var hitBox = new THREE.Box3().setFromObject(cube);
 
                 // HITBOX VISUAL
-                var visualBox = new THREE.Box3Helper(hitBox/*, HEX COLOR TO CHANGE BOX COLOR*/);
+                var visualBox = new THREE.Box3Helper(hitBox);
                 this.add(visualBox);
-
+                */
+                
                 // Add row of hitboxes and type of floor (maybe "floor" for non-game ending stuff like grass and
                 // roads, then "water", "lava", etc.)
-                hitBoxArray.push({hitBox: hitBox, type: type});
+                hitBoxArray.push(type);
             }
-            this.state.floorHitBox.push(hitBoxArray);
+            this.state.floorType.push(hitBoxArray);
         }
     }
 
@@ -189,6 +201,100 @@ class SeedScene extends Scene {
         lights.state.dir.target.position.z += movez;
     }
 
+    checkFloor() {
+        var landed = false;
+        var isJumping = this.state.character.state.jumping;
+
+        if(isJumping) {
+            landed = false;
+        }
+        
+        if(!isJumping && !landed){
+            landed = true;
+            var x = Math.round(this.state.character.position.x / gridsize);
+            var z = Math.round(this.state.character.position.z / gridsize);
+            if(x < 0 || z < 0 || x > this.state.floorType.length || z > this.state.floorType[0].length) {
+                debugger;
+            }
+            var floorType = this.state.floorType[x][z];
+            var charHitBox = this.state.character.state.hitBox;
+            if(floorType == undefined) {
+                debugger;
+            }
+            // Change character hitbox;
+            var visualBox
+            // White outline for grass, blue for water
+            // Demonstrates detection of where character landed so under water, can be game over instead of red hitbox
+            if(floorType === "grass") {
+                visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
+            }
+            else if(floorType === "water"){ 
+                // Add character state to check if character is on log
+                visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
+            }
+
+            this.remove(this.state.visualCharHitBox);
+            this.state.visualCharHitBox = visualBox;
+            this.add(visualBox);
+        }
+    }
+
+    makeCar(color, x, z) {
+        const boxWidth = gridsize-0.2;
+        const boxHeight = 0.5;
+        const boxDepth = gridsize-1;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+        const material = new THREE.MeshPhongMaterial({color});
+       
+        const car = new THREE.Mesh(geometry, material);
+        this.add(car);
+       
+        car.position.x = x;
+        car.position.y = (floory+gridsize) / 2;
+        car.position.z = z;
+        car.castShadow = true;
+        car.receiveShadow = true;
+
+        return car;
+    }
+
+    spawnCar(x, z) {
+        var car = this.makeCar(0xff9e00, x * gridsize, z * gridsize);
+        var hitBox = new THREE.Box3().setFromObject(car);
+        var visual = new THREE.Box3Helper(hitBox, 0xffffff);
+        this.add(visual);
+        this.state.cars.push({car: car, hitBox: hitBox});
+    }
+
+    updateCars(timeStamp) {
+        var cars = this.state.cars;
+        for(var i = 0; i < cars.length; i++) {
+            var prevPosX = cars[i].car.position.x;
+            var dirOff = (4.5 * gridsize) + (4.5 * gridsize) * Math.sin(timeStamp / 700);
+            cars[i].car.position.x = dirOff;
+            cars[i].hitBox.translate(new THREE.Vector3(dirOff - prevPosX, 0, 0));
+        }
+    }
+
+    checkCollisions() {
+        var cars = this.state.cars;
+        for(var i = 0; i < cars.length; i++) {
+            var posZ = cars[i].car.position.z;
+            var char = this.state.character;
+            if(posZ != Math.round(char.position.z)) {
+                continue;
+            }
+            var hitBox = cars[i].hitBox;
+            if(char.state.hitBox.intersectsBox(hitBox)) {
+                var visualBox = new THREE.Box3Helper(char.state.hitBox, 0xff0000);
+                this.remove(this.state.visualCharHitBox);
+                this.state.visualCharHitBox = visualBox;
+                this.add(visualBox);
+            }
+        }
+    }
+
+    /*
     collisions() {
         var isColliding = false;
         var isJumping = this.state.character.state.jumping;
@@ -202,22 +308,22 @@ class SeedScene extends Scene {
             if(x < 0 || z < 0 || x > 9 || z > 9) {
                 debugger;
             }
-            var beneathHitBox = this.state.floorHitBox[x][z];
+            var floorType = this.state.floorType[x][z];
             var charHitBox = this.state.character.state.hitBox;
-            if(beneathHitBox == undefined) {
+            if(floorType == undefined) {
                 debugger;
             }
-            var isInterecting = charHitBox.intersectsBox(beneathHitBox.hitBox);
+            var isInterecting = charHitBox.intersectsBox(floorType.hitBox);
             console.log('intersecting?:', isInterecting);
             console.log('hitbox center:', charHitBox.getCenter(new THREE.Vector3()));
             if(isInterecting){
                 isColliding = true;
                 var visualBox
                 // White outline for grass, red for water
-                if(beneathHitBox.type === "grass") {
-                    visualBox = new THREE.Box3Helper(charHitBox, 0x0abcde/*0xffffff*/);
+                if(floorType.type === "grass") {
+                    visualBox = new THREE.Box3Helper(charHitBox);
                 }
-                else if(beneathHitBox.type === "water"){ 
+                else if(floorType.type === "water"){ 
                     visualBox = new THREE.Box3Helper(charHitBox, 0xff0000);
                 }
 
@@ -226,10 +332,11 @@ class SeedScene extends Scene {
                 console.log('visual box center', visualBox.box.getCenter(new THREE.Vector3()));
                 this.add(visualBox);
             }
-            console.log('floorHitBoxCenter:', beneathHitBox.hitBox.getCenter(new THREE.Vector3()));
+            console.log('floorTypeCenter:', floorType.hitBox.getCenter(new THREE.Vector3()));
         }
         console.log('sphere center:', this.state.character.position);
     }
+    */
 }
 
 export default SeedScene;

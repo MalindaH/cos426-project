@@ -26,7 +26,6 @@ class Character extends Group {
             xPos: 0,
             zPos: 0,
             hitBox: null,
-            visualBox: null,
             charObject: null,
         };
 
@@ -45,7 +44,7 @@ class Character extends Group {
 
         // Create hitBox from sphere and attach to character
         var hitBox = new THREE.Box3().setFromObject(sphere);
-        hitBox.expandByVector(new THREE.Vector3(0, 0.6, 0));
+        hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
         this.state.hitBox = hitBox;
 
         // Add self to parent's update list
