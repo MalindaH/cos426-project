@@ -2,7 +2,6 @@ import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
 import { Flower, Land, Character } from 'objects';
 import { BasicLights, OrthoCamera } from 'lights';
-// import { OrthoCamera } from 'cameras';
 import * as THREE from 'three';
 
 const floory = -1;
