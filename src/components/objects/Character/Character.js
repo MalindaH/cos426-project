@@ -1,4 +1,4 @@
-import { Group } from 'three';
+import { DoubleSide, Group, Scene } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
@@ -25,6 +25,10 @@ class Character extends Group {
             jumpSpeed: 0.2,
             sqeeze: 0,
             unsqeeze: 0,
+            xPos: 0,
+            zPos: 0,
+            hitBox: null,
+            charObject: null,
         };
 
         // Load object
@@ -39,6 +43,15 @@ class Character extends Group {
         });
 
         // this.add(this.makeSphere(0xaa33aa, 0, 0));
+        // Create Sphere
+        var sphere = this.makeSphere(0xaa33aa, 0, 0);
+        this.state.charObject = sphere;
+        this.add(sphere);
+
+        // Create hitBox from sphere and attach to character
+        var hitBox = new THREE.Box3().setFromObject(sphere);
+        hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
+        this.state.hitBox = hitBox;
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
@@ -76,6 +89,7 @@ class Character extends Group {
         // character only allowed to reach -6 to +6 grids (jump 5 times from center)
         const EPS = 0.001;
         if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
+        // if(this.position.x + movex >= -1*gridsize && this.position.x + movex <= 9*gridsize && this.position.z + movez >= 0) {
             this.state.jumpMovex = movex;
             this.state.jumpMovez = movez;
         }
@@ -122,6 +136,9 @@ class Character extends Group {
             }
         }
 
+        // Previous position
+        var prevPos = this.position.clone();
+
         // execute jump animation
         if(!this.state.jumping && this.state.unsqeeze>-EPS && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
             this.state.jumping = true;
@@ -159,7 +176,14 @@ class Character extends Group {
                 }
             }
         }
-
+        
+        // Position offset
+        var posOff = this.position.clone().sub(prevPos);
+        
+        //Round x and z coords
+        posOff.setX = Math.round(posOff.x);
+        posOff.setZ = Math.round(posOff.z);
+        this.state.hitBox.translate(posOff);
         // Advance tween animations, if any exist
         // TWEEN.update();
     }
