@@ -107,7 +107,8 @@ class Character extends Group {
         }
 
         // add jump from queue
-        if(!this.state.jumping && this.state.jumpQueue.length>0) {
+        if(!this.state.jumping && this.state.sqeeze<EPS && this.state.unsqeeze<EPS && this.state.jumpQueue.length>0) {
+            console.log(this.state.sqeeze,this.state.unsqeeze, this.state.jumpQueue);
             switch(this.state.jumpQueue.shift()) { // delete first element from array
                 case 1: //"forward"
                     this.state.sqeeze=0.3; // lower a bit while turning, before jumping
@@ -140,7 +141,7 @@ class Character extends Group {
         var prevPos = this.position.clone();
 
         // execute jump animation
-        if(!this.state.jumping && this.state.unsqeeze>-EPS && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
+        if(!this.state.jumping && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
             this.state.jumping = true;
             if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
                 this.state.jumpSpeed = this.state.jumpMovex/jumpTimeTotal;

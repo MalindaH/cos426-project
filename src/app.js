@@ -160,3 +160,8 @@ document.addEventListener("keydown", (event) => {
     }
     scene.onDocumentKeyDown(event);
 }, false);
+
+document.addEventListener("keyup", (event) => {
+    scene.onDocumentKeyUp(event);
+}, false);
+

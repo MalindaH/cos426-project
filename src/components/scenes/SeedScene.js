@@ -10,6 +10,8 @@ const charStartX = 10;
 const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
 
+var pressed = {}; // to ignore long key presses
+
 class SeedScene extends Scene {
     constructor(camera1, camera2) {
         // Call parent Scene() constructor
@@ -161,6 +163,9 @@ class SeedScene extends Scene {
     }
 
     onDocumentKeyDown(e) {
+        if ( pressed[e.which] ) return;
+        pressed[e.which] = true;
+
         const {character} = this.state;
         if (e.which == 87) { // w
             character.addToJumpQueue(1);
@@ -180,6 +185,11 @@ class SeedScene extends Scene {
             // this.moveCamera(-gridsize, 0);
         }
     }
+
+    onDocumentKeyUp(e) {
+        if ( !pressed[e.which] ) return;
+        pressed[e.which] = false;
+    };
 
     cameraMovement() {
         const {cameras, character, camerasOrigX, camerasOrigZ} = this.state;
