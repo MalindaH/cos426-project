@@ -49,9 +49,6 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
-        // Add oscillating "car"
-        this.spawnCar(5, 2);
-
         //const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
         //this.add(cameraHelper);
     }
@@ -68,13 +65,23 @@ class SeedScene extends Scene {
         for (const obj of updateList) {
             obj.update(timeStamp);
         }
-        
+
+        // Spawn single car in row 3 from right to left
+        if(this.state.cars.length == 0) {
+            this.spawnCar(2, 2, 0);
+            this.spawnCar(2, 3, 1);
+        }
+
+        // Check floor under player
         this.checkFloor();
         
+        // Update movement of car and remove cars out of certain range
         this.updateCars(timeStamp);
 
+        // Check for collisions between cars
         this.checkCollisions();
-        //this.collisions();
+
+        // Check for game over 
         
     }
 
@@ -202,6 +209,7 @@ class SeedScene extends Scene {
     }
 
     checkFloor() {
+        // landed flag to stop checking if already checked
         var landed = false;
         var isJumping = this.state.character.state.jumping;
 
@@ -211,18 +219,26 @@ class SeedScene extends Scene {
         
         if(!isJumping && !landed){
             landed = true;
+            // Quantize player position
             var x = Math.round(this.state.character.position.x / gridsize);
             var z = Math.round(this.state.character.position.z / gridsize);
+
+            // Check if position is not in range of floor grid
             if(x < 0 || z < 0 || x > this.state.floorType.length || z > this.state.floorType[0].length) {
                 debugger;
             }
+
             var floorType = this.state.floorType[x][z];
             var charHitBox = this.state.character.state.hitBox;
+
+            // Check if floor is undefined
             if(floorType == undefined) {
                 debugger;
             }
+
             // Change character hitbox;
-            var visualBox
+            var visualBox;
+
             // White outline for grass, blue for water
             // Demonstrates detection of where character landed so under water, can be game over instead of red hitbox
             if(floorType === "grass") {
@@ -233,6 +249,7 @@ class SeedScene extends Scene {
                 visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }
 
+            // Update hitBox color
             this.remove(this.state.visualCharHitBox);
             this.state.visualCharHitBox = visualBox;
             this.add(visualBox);
@@ -258,21 +275,67 @@ class SeedScene extends Scene {
         return car;
     }
 
-    spawnCar(x, z) {
-        var car = this.makeCar(0xff9e00, x * gridsize, z * gridsize);
+    // Spawn car with type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus), z position 
+    // along the grid to start, and starting side (0 for left, 1 for right)
+    spawnCar(type, z, side) {
+        var x ,car;
+        if(side == 0) {
+            // Change number to leftmost position
+            x = 10 * gridsize;
+        }
+        else if(side == 1) {
+            // Change number to rightmost position
+            x = -1 * gridsize;
+        }
+
+        // Add if statements with types to change car model
+        var car = this.makeCar(0xff9e00, x, z * gridsize);
+
+        // Add hitBox
         var hitBox = new THREE.Box3().setFromObject(car);
         var visual = new THREE.Box3Helper(hitBox, 0xffffff);
         this.add(visual);
-        this.state.cars.push({car: car, hitBox: hitBox});
+
+        // Push cars into array of cars currently in scene
+        this.state.cars.push({car: car, type: type, side: side, hitBox: hitBox, visual: visual});
     }
 
     updateCars(timeStamp) {
         var cars = this.state.cars;
         for(var i = 0; i < cars.length; i++) {
+            // Previous car position
             var prevPosX = cars[i].car.position.x;
-            var dirOff = (4.5 * gridsize) + (4.5 * gridsize) * Math.sin(timeStamp / 700);
-            cars[i].car.position.x = dirOff;
-            cars[i].hitBox.translate(new THREE.Vector3(dirOff - prevPosX, 0, 0));
+
+            // Remove car if out of "view"
+            if(prevPosX < -1 * gridsize || prevPosX > 10 * gridsize) {
+                cars[i].hitBox = null;
+                this.remove(cars[i].car);
+                this.remove(cars[i].visual);
+                cars.splice(i, 1);
+                break;
+            }
+
+            // Set speed of car depending on type
+            var speed;
+            if(cars[i].type == 1) {
+                speed = 5;
+            }
+            else if(cars[i].type == 2) {
+                speed = 10;
+            }
+            else if(cars[i].type == 3) {
+                speed = 15;
+            }
+            
+            // Flip speed if going from left to right (-x direction)
+            if(cars[i].side == 0) {
+                speed *= -1;
+            }
+
+            // Direction offset
+            var dirOff = speed * 0.01;
+            cars[i].car.position.x += dirOff;
+            cars[i].hitBox.translate(new THREE.Vector3(dirOff, 0, 0));
         }
     }
 
@@ -281,9 +344,13 @@ class SeedScene extends Scene {
         for(var i = 0; i < cars.length; i++) {
             var posZ = cars[i].car.position.z;
             var char = this.state.character;
+
+            // If car is not in the same lane as character, then dont check for collisions
             if(posZ != Math.round(char.position.z)) {
                 continue;
             }
+
+            // Check if car intersects character
             var hitBox = cars[i].hitBox;
             if(char.state.hitBox.intersectsBox(hitBox)) {
                 var visualBox = new THREE.Box3Helper(char.state.hitBox, 0xff0000);
