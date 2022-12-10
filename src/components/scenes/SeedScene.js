@@ -7,6 +7,7 @@ import * as THREE from 'three';
 
 const floory = -1;
 const gridsize = 2;
+const charStartX = 10;
 const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
 
@@ -109,9 +110,7 @@ class SeedScene extends Scene {
         // TODO: add logs / cars / ...
 
         // placeholder cubes
-        var curx = -20;
-        var curz = 0;
-        for (var i = 0; i < 10; i++) {
+        for (var i = -8; i < 20; i++) {
             var hitBoxArray = [];
             for(var j = 0; j < 5; j++) {
                 // Alternate between grass and water
@@ -191,8 +190,8 @@ class SeedScene extends Scene {
             // camera.position.z += cameraForwardSpeed;
             // this.moveLight(0, cameraForwardSpeed);
 
-            // follow character: character only allowed to reach -6 to +6 grids (jump 5 times from center)
-            const distX = camera.position.x - camerasOrigX[ii] - character.position.x;
+            // follow character
+            const distX = camera.position.x - camerasOrigX[ii] - character.position.x + charStartX;
             const distZ = camera.position.z - camerasOrigZ[ii] - character.position.z;
             // distance between them to get speed
             const speedX = -distX/camerasFollowTime[ii];

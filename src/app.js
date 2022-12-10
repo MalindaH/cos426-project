@@ -12,18 +12,12 @@
  // import { OrthoCamera } from 'lights';
  import * as THREE from 'three';
  
+ const charStartX = 10;
  const frustumSize = 1500;
  const aspect = window.innerWidth / window.innerHeight;
  
  // Initialize core ThreeJS components
- // const scene = new SeedScene();
- // const camera = new OrthoCamera(frustumSize, aspect).state.cam;
  const renderer = new WebGLRenderer({ antialias: true });
- 
- // Set up camera
- // const camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -100, 3000);
- // camera.position.set(-3,7,-5);
- // camera.zoom = 80;
  
  // implement multiple views
  const views = [
@@ -35,7 +29,7 @@
          cBottom: frustumSize / - 2,
          cNear: -100,
          cFar: 3000,
-         position: [-3,7,-5],
+         position: [-3+charStartX,7,-5],
          zoom: 80,
          left: 0,
          bottom: 0,
@@ -50,7 +44,7 @@
          cBottom: frustumSize / - 2,
          cNear: -100,
          cFar: 500,
-         position: [0,3,0.05],
+         position: [charStartX,3,0.05],
          zoom: 200,
          left: 0.7,
          bottom: 0,
@@ -80,11 +74,11 @@
          controls.enableDamping = true;
          controls.enablePan = true;
          controls.maxPolarAngle = Math.PI/2; // don't allow camera to go below floor
-         controls.target = new Vector3(0, 0, 5);
+         controls.target = new Vector3(charStartX, 0, 5);
          controls.update();
          controls.addEventListener('change', () => {renderer.render(scene, camera)});
      } else {
-         camera.lookAt(0,0,8);
+         camera.lookAt(charStartX,0,8);
      }
  }
  

@@ -7,6 +7,7 @@ import * as THREE from 'three';
 const floory = -1;
 const jumpTimeTotal = 15;
 const gridsize = 2;
+const charStartX = 10;
 
 class Character extends Group {
     constructor(parent) {
@@ -45,7 +46,7 @@ class Character extends Group {
         });
 
         // Create Sphere
-        var sphere = this.makeSphere(0xaa33aa, 0, 0);
+        var sphere = this.makeSphere(0xaa33aa, 10, 0);
         this.state.charObject = sphere;
         // this.add(sphere);
         
@@ -53,6 +54,8 @@ class Character extends Group {
         var hitBox = new THREE.Box3().setFromObject(this.state.charObject);
         hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
         this.state.hitBox = hitBox;
+
+        this.position.x = charStartX;
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
@@ -83,10 +86,10 @@ class Character extends Group {
     }
 
     jump(movex, movez) {
-        // character only allowed to reach -6 to +6 grids (jump 5 times from center)
+        // character only allowed to jump 5 times from center
         const EPS = 0.001;
-        if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
-        // if(this.position.x + movex >= -1*gridsize && this.position.x + movex <= 9*gridsize && this.position.z + movez >= 0) {
+        // if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
+        if(this.position.x + movex >= -1*gridsize && this.position.x + movex <= 10*gridsize && this.position.z + movez >= 0) {
             this.state.jumpMovex = movex;
             this.state.jumpMovez = movez;
         }
