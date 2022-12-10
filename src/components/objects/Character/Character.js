@@ -1,11 +1,12 @@
 import { Group } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
+// import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
-// import MODEL from './flower.gltf';
+// import MODEL from './mallard/scene.gltf';
 
 const floory = -1;
 const jumpTimeTotal = 15;
+const gridsize = 2;
 
 class Character extends Group {
     constructor(parent) {
@@ -16,29 +17,45 @@ class Character extends Group {
         this.state = {
             gui: parent.state.gui,
             jumping: false,
+            jumpQueue: [],
             jumpMovex: 0,
             jumpMovez: 0,
             jumpTimeTotal: 0,
             jumpTimeElapsed: 0,
             jumpSpeed: 0.2,
+            sqeeze: 0,
+            unsqeeze: 0,
+            xPos: 0,
+            zPos: 0,
+            hitBox: null,
+            charObject: null,
         };
 
-        // // Load object
-        // const loader = new GLTFLoader();
+        // Load object
+        const loader = new GLTFLoader();
 
-        // this.name = 'flower';
-        // loader.load(MODEL, (gltf) => {
-        //     this.add(gltf.scene);
-        // });
+        loader.load('./src/gltf/mallard/scene.gltf', (gltf) => {
+            gltf.scene.scale.set(0.8, 0.8, 0.8); 
+            gltf.scene.position.z += 0.3;
+            this.add(gltf.scene);
+            gltf.scene.traverse( function( node ) {
+                if ( node.isMesh ) { node.castShadow = true; }
+            } );
+            // const obj = gltf.scene.getObjectByName('Sketchfab_model');
+        });
 
-        this.add(this.makeSphere(0xaa33aa, 0, 0));
+        // Create Sphere
+        var sphere = this.makeSphere(0xaa33aa, 0, 0);
+        this.state.charObject = sphere;
+        // this.add(sphere);
+        
+        // Create hitBox from sphere and attach to character
+        var hitBox = new THREE.Box3().setFromObject(this.state.charObject);
+        hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
+        this.state.hitBox = hitBox;
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
-
-        // // Populate GUI
-        // this.state.gui.add(this.state, 'bob');
-        // this.state.gui.add(this.state, 'spin');
     }
 
     makeSphere(color, x, z) {
@@ -59,14 +76,68 @@ class Character extends Group {
         return sphere;
     }
 
+    addToJumpQueue(direction) {
+        if(this.state.jumpQueue.length<3) {
+            this.state.jumpQueue.push(direction);
+        }
+    }
+
     jump(movex, movez) {
-        this.state.jumpMovex = movex;
-        this.state.jumpMovez = movez;
+        // character only allowed to reach -6 to +6 grids (jump 5 times from center)
+        const EPS = 0.001;
+        if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
+        // if(this.position.x + movex >= -1*gridsize && this.position.x + movex <= 9*gridsize && this.position.z + movez >= 0) {
+            this.state.jumpMovex = movex;
+            this.state.jumpMovez = movez;
+        }
     }
 
     update(timeStamp) {
         const EPS = 0.001;
-        if(!this.state.jumping && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
+        if(this.state.sqeeze > EPS) {
+            this.state.sqeeze -= 0.1;
+            this.scale.set(1,this.scale.y-0.1,1);
+        }
+        if(this.state.sqeeze>-EPS && this.state.sqeeze<EPS && this.state.unsqeeze > EPS) {
+            this.state.unsqeeze -= 0.1;
+            this.scale.set(1,this.scale.y+0.1,1);
+        }
+
+        // add jump from queue
+        if(!this.state.jumping && this.state.jumpQueue.length>0) {
+            switch(this.state.jumpQueue.shift()) { // delete first element from array
+                case 1: //"forward"
+                    this.state.sqeeze=0.3; // lower a bit while turning, before jumping
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = 0;
+                    this.jump(0, gridsize);
+                    break;
+                case 2: //"left"
+                    this.state.sqeeze=0.3;
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = Math.PI/2;
+                    this.jump(gridsize, 0);
+                    break;
+                case 3: //"backward"
+                    this.state.sqeeze=0.3;
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = Math.PI;
+                    this.jump(0, -gridsize);
+                    break;
+                case 4: //"right"
+                    this.state.sqeeze=0.3;
+                    this.state.unsqeeze=0.3;
+                    this.rotation.y = -Math.PI/2;
+                    this.jump(-gridsize, 0);
+                    break;
+            }
+        }
+
+        // Previous position
+        var prevPos = this.position.clone();
+
+        // execute jump animation
+        if(!this.state.jumping && this.state.unsqeeze>-EPS && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
             this.state.jumping = true;
             if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
                 this.state.jumpSpeed = this.state.jumpMovex/jumpTimeTotal;
@@ -80,8 +151,7 @@ class Character extends Group {
             }
             this.state.jumpTimeElapsed += 1;
             this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
-        }
-        else if(this.state.jumping) {
+        } else if(this.state.jumping) {
             if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
                 this.state.jumping = false;
                 this.state.jumpTime = 0;
@@ -102,8 +172,15 @@ class Character extends Group {
                     this.state.jumpMovez -= this.state.jumpSpeed;
                 }
             }
-
         }
+        
+        // Position offset
+        var posOff = this.position.clone().sub(prevPos);
+        
+        //Round x and z coords
+        posOff.setX = Math.round(posOff.x);
+        posOff.setZ = Math.round(posOff.z);
+        this.state.hitBox.translate(posOff);
 
         // Advance tween animations, if any exist
         // TWEEN.update();
