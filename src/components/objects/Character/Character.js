@@ -1,6 +1,6 @@
-import { DoubleSide, Group, Scene } from 'three';
+import { Group } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
+// import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
 // import MODEL from './mallard/scene.gltf';
 
@@ -35,30 +35,27 @@ class Character extends Group {
         const loader = new GLTFLoader();
 
         loader.load('./src/gltf/mallard/scene.gltf', (gltf) => {
+            gltf.scene.scale.set(0.8, 0.8, 0.8); 
+            gltf.scene.position.z += 0.3;
             this.add(gltf.scene);
             gltf.scene.traverse( function( node ) {
                 if ( node.isMesh ) { node.castShadow = true; }
             } );
-        
+            // const obj = gltf.scene.getObjectByName('Sketchfab_model');
         });
 
-        // this.add(this.makeSphere(0xaa33aa, 0, 0));
         // Create Sphere
         var sphere = this.makeSphere(0xaa33aa, 0, 0);
         this.state.charObject = sphere;
-        this.add(sphere);
-
+        // this.add(sphere);
+        
         // Create hitBox from sphere and attach to character
-        var hitBox = new THREE.Box3().setFromObject(sphere);
+        var hitBox = new THREE.Box3().setFromObject(this.state.charObject);
         hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
         this.state.hitBox = hitBox;
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
-
-        // // Populate GUI
-        // this.state.gui.add(this.state, 'bob');
-        // this.state.gui.add(this.state, 'spin');
     }
 
     makeSphere(color, x, z) {
@@ -184,6 +181,7 @@ class Character extends Group {
         posOff.setX = Math.round(posOff.x);
         posOff.setZ = Math.round(posOff.z);
         this.state.hitBox.translate(posOff);
+
         // Advance tween animations, if any exist
         // TWEEN.update();
     }
