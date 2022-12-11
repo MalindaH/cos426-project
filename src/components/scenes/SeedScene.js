@@ -6,6 +6,8 @@ import * as THREE from 'three';
 
 const floory = -1;
 const gridsize = 2;
+const gridMinX = -8;
+const gridMaxX = 18;
 const charStartX = 10;
 const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
@@ -111,7 +113,7 @@ class SeedScene extends Scene {
         // TODO: add logs / cars / ...
 
         // placeholder cubes
-        for (var i = -8; i < 20; i++) {
+        for (var i = gridMinX; i <= gridMaxX; i++) {
             var hitBoxArray = [];
             for(var j = 0; j < 5; j++) {
                 // Alternate between grass and water
@@ -321,7 +323,7 @@ class SeedScene extends Scene {
             var prevPosX = cars[i].car.position.x;
 
             // Remove car if out of "view"
-            if(prevPosX < -1 * gridsize || prevPosX > 10 * gridsize) {
+            if(prevPosX < gridMinX * gridsize || prevPosX > gridMaxX * gridsize) {
                 cars[i].hitBox = null;
                 this.remove(cars[i].car);
                 this.remove(cars[i].visual);

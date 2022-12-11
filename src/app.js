@@ -12,6 +12,10 @@ import { SeedScene } from 'scenes';
 // import { OrthoCamera } from 'lights';
 import * as THREE from 'three';
 
+var gameStarted = false;
+var text2Removed = false;
+var numStepsForward = 0;
+
 const charStartX = 10;
 const frustumSize = 1500;
 const aspect = window.innerWidth / window.innerHeight;
@@ -85,12 +89,13 @@ for ( let ii = 0; ii < views.length; ++ ii ) {
 // const scene = new SeedScene(camera);
 const scene = new SeedScene(views[0].camera, views[1].camera);
 
+// game title TIGER ROAD
 var text2 = document.createElement('div');
 text2.innerHTML = "TIGER ROAD";
 //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
 text2.style.fontSize = "10vw";
 text2.style.fontFamily = "Impact,Charcoal,sans-serif";
-text2.style.textShadow = "-5px -5px 0 #ff6600, 5px -5px 0 #ff6600, -5px 5px 0 #ff6600, 5px 5px 0 #ff6600";
+text2.style.textShadow = "-0.3vw -0.3vw 0 #ff6600, 0.3vw -0.3vw 0 #ff6600, -0.3vw 0.3vw 0 #ff6600, 0.3vw 0.3vw 0 #ff6600"; // -5px -5px 0 #ff6600, 5px -5px 0 #ff6600, -5px 5px 0 #ff6600, 5px 5px 0 #ff6600
 // text2.style.color = "orange";
 text2.style.width = 300;
 text2.style.height = 300;
@@ -98,11 +103,23 @@ text2.style.position = 'absolute';
 text2.style.top = "50%";
 text2.style.left = "50%";
 text2.style.transform = "translate(-50%,-50%)";
+text2.style.whiteSpace = "nowrap";
 document.body.appendChild(text2);
+
+var text1 = document.createElement('div');
+text1.innerHTML = "1";
+text1.style.fontSize = "6vw";
+text1.style.fontFamily = "Impact,Charcoal,sans-serif";
+text1.style.textShadow = "-0.2vw -0.2vw 0 #ff6600, 0.2vw -0.2vw 0 #ff6600, -0.2vw 0.2vw 0 #ff6600, 0.2vw 0.2vw 0 #ff6600";
+text1.style.width = 300;
+text1.style.height = 300;
+text1.style.position = 'absolute';
+text1.style.top = "0%";
+text1.style.transform = "translate(50%)";
+text1.style.whiteSpace = "nowrap";
 
 function render() {
     for ( let ii = 0; ii < views.length; ++ ii ) {
-
         const view = views[ ii ];
         const camera = view.camera;
 
@@ -120,7 +137,18 @@ function render() {
         camera.updateProjectionMatrix();
 
         renderer.render( scene, camera );
-
+    }
+    if(!text2Removed && gameStarted) {
+        var left = parseInt(text2.style.left.slice(0,-1));
+        if(left>=140) {
+            document.body.removeChild(text2);
+            text2Removed = true;
+        } else {
+            text2.style.left = (left+3)+"%";
+        }
+    }
+    if(gameStarted) {
+        document.body.appendChild(text1);
     }
 }
 
@@ -140,24 +168,32 @@ const windowResizeHandler = () => {
     renderer.setSize(innerWidth, innerHeight);
     // camera.aspect = innerWidth / innerHeight;
     // camera.updateProjectionMatrix();
-    const camera = views[0].camera;
-    const aspect = window.innerWidth / window.innerHeight;
-    camera.left = - frustumSize * aspect / 2;
-    camera.right = frustumSize * aspect / 2;
-    camera.top = frustumSize / 2;
-    camera.bottom = - frustumSize / 2;
-
-    camera.updateProjectionMatrix();
+    for(let ii=0; ii<views.length; ii++) {
+        const camera = views[ii].camera;
+        const aspect = window.innerWidth / window.innerHeight;
+        camera.left = - frustumSize * aspect / 2;
+        camera.right = frustumSize * aspect / 2;
+        camera.top = frustumSize / 2;
+        camera.bottom = - frustumSize / 2;
+        camera.updateProjectionMatrix();
+    }
 };
 windowResizeHandler();
 window.addEventListener('resize', windowResizeHandler, false);
 
-var gameStarted = false;
+
 document.addEventListener("keydown", (event) => {
     if(!gameStarted) {
-        document.body.removeChild(text2);
+        // document.body.removeChild(text2);
         gameStarted = true;
     }
+    if(event.which == 87) { // w
+        numStepsForward++;
+    } else if (event.which == 83) { // s
+        numStepsForward--;
+    }
+    var score = parseInt(text1.innerHTML);
+    text1.innerHTML = Math.max(score, numStepsForward);
     scene.onDocumentKeyDown(event);
 }, false);
 
