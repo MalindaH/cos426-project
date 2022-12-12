@@ -1,7 +1,8 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
-import { Flower, Land, Character } from 'objects';
+import { Flower, Land, Character, GolfCart } from 'objects';
 import { BasicLights, OrthoCamera } from 'lights';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
 const floory = -1;
@@ -11,6 +12,8 @@ const gridMaxX = 18;
 const charStartX = 10;
 const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
+
+const loader = new GLTFLoader();
 
 var pressed = {}; // to ignore long key presses
 
@@ -75,8 +78,9 @@ class SeedScene extends Scene {
 
         // Spawn single car in row 3 from right to left
         if(this.state.cars.length == 0) {
-            this.spawnCar(2, 2, 0);
-            this.spawnCar(2, 3, 1);
+            this.spawnCar(1, 2, 0);
+            // this.spawnCar(2, 3, 1);
+            // this.spawnCar(3, 4, 0);
         }
 
         // Check floor under player
@@ -291,24 +295,35 @@ class SeedScene extends Scene {
         return car;
     }
 
+    makeCarGltf(type, x, z, side) {
+        if(type==1) {
+            var golfcart = new GolfCart(this, x, z, side);
+            this.add(golfcart);
+            return golfcart;
+        } 
+        
+    }
+
     // Spawn car with type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus), z position 
     // along the grid to start, and starting side (0 for left, 1 for right)
     spawnCar(type, z, side) {
         var x ,car;
         if(side == 0) {
             // Change number to leftmost position
-            x = 10 * gridsize;
+            x = gridMaxX * gridsize;
         }
         else if(side == 1) {
             // Change number to rightmost position
-            x = -1 * gridsize;
+            x = gridMinX * gridsize;
         }
 
         // Add if statements with types to change car model
-        var car = this.makeCar(0xff9e00, x, z * gridsize);
+        // var car = this.makeCar(0xff9e00, x, z * gridsize);
+        var car = this.makeCarGltf(type, x, z * gridsize, side);
+        var hitBox = car.state.hitBox;
 
         // Add hitBox
-        var hitBox = new THREE.Box3().setFromObject(car);
+        // var hitBox = new THREE.Box3().setFromObject(car);
         var visual = new THREE.Box3Helper(hitBox, 0xffffff);
         this.add(visual);
 
@@ -356,7 +371,8 @@ class SeedScene extends Scene {
     }
 
     checkCollisions() {
-        var cars = this.state.cars;
+        const {cars} = this.state;
+        // var cars = this.state.cars;
         for(var i = 0; i < cars.length; i++) {
             var posZ = cars[i].car.position.z;
             var char = this.state.character;

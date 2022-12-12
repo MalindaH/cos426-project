@@ -46,7 +46,7 @@ class Character extends Group {
         });
 
         // Create Sphere
-        var sphere = this.makeSphere(0xaa33aa, 10, 0);
+        var sphere = this.makeSphere(0xaa33aa, charStartX, 0);
         this.state.charObject = sphere;
         // this.add(sphere);
         
@@ -108,7 +108,7 @@ class Character extends Group {
 
         // add jump from queue
         if(!this.state.jumping && this.state.sqeeze<EPS && this.state.unsqeeze<EPS && this.state.jumpQueue.length>0) {
-            console.log(this.state.sqeeze,this.state.unsqeeze, this.state.jumpQueue);
+            // console.log(this.state.sqeeze,this.state.unsqeeze, this.state.jumpQueue);
             switch(this.state.jumpQueue.shift()) { // delete first element from array
                 case 1: //"forward"
                     this.state.sqeeze=0.3; // lower a bit while turning, before jumping
