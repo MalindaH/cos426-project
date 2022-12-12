@@ -7,7 +7,7 @@ const floory = -1;
 const gridsize = 2;
 const charStartX = 10;
 
-class GolfCart extends Group {
+class TigerTransit extends Group {
     constructor(parent, x, z, side) {
         // Call parent Group() constructor
         super();
@@ -23,9 +23,9 @@ class GolfCart extends Group {
         // Load object
         const loader = new GLTFLoader();
 
-        loader.load('./src/gltf/golf_cart/scene.gltf', (gltf) => {
-            gltf.scene.scale.set(0.006, 0.006, 0.006); 
-            gltf.scene.position.y += 0.3;
+        loader.load('./src/gltf/tiger_transit/bus_new2.gltf', (gltf) => {
+            gltf.scene.scale.set(0.4, 0.4, 0.4); 
+            gltf.scene.position.y -= 0.35;
             gltf.scene.position.x += 0.2;
             this.add(gltf.scene);
             gltf.scene.traverse( function( node ) {
@@ -36,8 +36,8 @@ class GolfCart extends Group {
             }
         });
 
-        const boxWidth = gridsize+0.5;
-        const boxHeight = 1.7;
+        const boxWidth = gridsize+2.5;
+        const boxHeight = 2;
         const boxDepth = gridsize-1;
         const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
         const material = new THREE.MeshPhongMaterial(0xff9e00);
@@ -75,4 +75,4 @@ class GolfCart extends Group {
     }
 }
 
-export default GolfCart;
+export default TigerTransit;

@@ -1,6 +1,6 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
-import { Flower, Land, Character, GolfCart } from 'objects';
+import { Flower, Land, Character, GolfCart, Psafe, TigerTransit } from 'objects';
 import { BasicLights, OrthoCamera } from 'lights';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
@@ -56,9 +56,6 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
-        // const flower = new Flower();
-        // this.add(flower);
-
         // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
         // this.add(cameraHelper);
     }
@@ -77,10 +74,10 @@ class SeedScene extends Scene {
         }
 
         // Spawn single car in row 3 from right to left
-        if(this.state.cars.length == 0) {
+        if(this.state.cars.length == 0) { // car type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus)
             this.spawnCar(1, 2, 0);
-            // this.spawnCar(2, 3, 1);
-            // this.spawnCar(3, 4, 0);
+            this.spawnCar(2, 3, 1);
+            this.spawnCar(3, 4, 0);
         }
 
         // Check floor under player
@@ -222,9 +219,9 @@ class SeedScene extends Scene {
 
     moveLight(movex, movez) {
         const {lights} = this.state;
-        lights.state.dir.position.x += movex;
+        // lights.state.dir.position.x += movex;
         lights.state.dir.position.z += movez;
-        lights.state.dir.target.position.x += movex;
+        // lights.state.dir.target.position.x += movex;
         lights.state.dir.target.position.z += movez;
     }
 
@@ -300,7 +297,15 @@ class SeedScene extends Scene {
             var golfcart = new GolfCart(this, x, z, side);
             this.add(golfcart);
             return golfcart;
-        } 
+        } else if(type==2) {
+            var psafe = new Psafe(this, x, z, side);
+            this.add(psafe);
+            return psafe;
+        } else { // type==3
+            var tigertransit = new TigerTransit(this, x, z, side);
+            this.add(tigertransit);
+            return tigertransit;
+        }
         
     }
 
@@ -349,13 +354,13 @@ class SeedScene extends Scene {
             // Set speed of car depending on type
             var speed;
             if(cars[i].type == 1) {
-                speed = 5;
+                speed = 7;
             }
             else if(cars[i].type == 2) {
-                speed = 10;
+                speed = 17;
             }
             else if(cars[i].type == 3) {
-                speed = 15;
+                speed = 12;
             }
             
             // Flip speed if going from left to right (-x direction)

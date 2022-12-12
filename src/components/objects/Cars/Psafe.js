@@ -7,7 +7,7 @@ const floory = -1;
 const gridsize = 2;
 const charStartX = 10;
 
-class GolfCart extends Group {
+class Psafe extends Group {
     constructor(parent, x, z, side) {
         // Call parent Group() constructor
         super();
@@ -23,21 +23,24 @@ class GolfCart extends Group {
         // Load object
         const loader = new GLTFLoader();
 
-        loader.load('./src/gltf/golf_cart/scene.gltf', (gltf) => {
-            gltf.scene.scale.set(0.006, 0.006, 0.006); 
-            gltf.scene.position.y += 0.3;
+        loader.load('./src/gltf/police/policecar.gltf', (gltf) => {
+            gltf.scene.scale.set(0.8, 0.8, 0.8); 
+            gltf.scene.position.y += 0.1;
             gltf.scene.position.x += 0.2;
             this.add(gltf.scene);
             gltf.scene.traverse( function( node ) {
                 if ( node.isMesh ) { node.castShadow = true; }
             } );
             if(side==0) {
-                gltf.scene.rotation.y = Math.PI;
+                gltf.scene.rotation.y = -Math.PI/2;
+            } else { // side==1
+                gltf.scene.rotation.y = Math.PI/2;
             }
+
         });
 
-        const boxWidth = gridsize+0.5;
-        const boxHeight = 1.7;
+        const boxWidth = gridsize+2;
+        const boxHeight = 1.5;
         const boxDepth = gridsize-1;
         const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
         const material = new THREE.MeshPhongMaterial(0xff9e00);
@@ -75,4 +78,4 @@ class GolfCart extends Group {
     }
 }
 
-export default GolfCart;
+export default Psafe;
