@@ -36,7 +36,7 @@ class Character extends Group {
         const loader = new GLTFLoader();
 
         loader.load('./src/gltf/mallard/scene.gltf', (gltf) => {
-            gltf.scene.scale.set(0.8, 0.8, 0.8); 
+            gltf.scene.scale.set(0.7, 0.7, 0.7); 
             gltf.scene.position.z += 0.3;
             this.add(gltf.scene);
             gltf.scene.traverse( function( node ) {
@@ -62,7 +62,7 @@ class Character extends Group {
     }
 
     makeSphere(color, x, z) {
-        const radius = 0.7;  // ui: radius
+        const radius = 0.6;  // ui: radius
         const widthSegments = 12;  // ui: widthSegments
         const heightSegments = 8;  // ui: heightSegments
         const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
@@ -89,7 +89,7 @@ class Character extends Group {
         // character only allowed to jump 5 times from center
         const EPS = 0.001;
         // if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
-        if(this.position.x + movex >= -1*gridsize && this.position.x + movex <= 10*gridsize && this.position.z + movez >= 0) {
+        if(this.position.x + movex >= -1*gridsize-EPS && this.position.x + movex <= 10*gridsize+EPS && this.position.z + movez >= -EPS) {
             this.state.jumpMovex = movex;
             this.state.jumpMovez = movez;
         }

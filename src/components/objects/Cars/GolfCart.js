@@ -50,7 +50,7 @@ class GolfCart extends Group {
 
         this.position.x = x;
         this.position.z = z;
-        this.position.y = (floory+gridsize) / 2;
+        this.position.y = (floory+gridsize)/2 -0.2;
 
         // Create hitBox from box and attach to character
         var hitBox = new THREE.Box3().setFromObject(this.state.charObject);

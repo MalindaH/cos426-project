@@ -183,7 +183,7 @@ window.addEventListener('resize', windowResizeHandler, false);
 
 
 document.addEventListener("keydown", (event) => {
-    if(!gameStarted) {
+    if(!gameStarted && (event.which == 87 || event.which == 65 || event.which == 83 || event.which == 68) ) {
         // document.body.removeChild(text2);
         gameStarted = true;
     }

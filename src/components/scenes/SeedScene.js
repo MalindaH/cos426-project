@@ -74,7 +74,7 @@ class SeedScene extends Scene {
         }
 
         // Spawn single car in row 3 from right to left
-        if(this.state.cars.length == 0) { // car type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus)
+        if(this.state.cars.length <= 1) { // car type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus)
             this.spawnCar(1, 2, 0);
             this.spawnCar(2, 3, 1);
             this.spawnCar(3, 4, 0);
@@ -97,12 +97,7 @@ class SeedScene extends Scene {
         const width = 900;
         const height = 900;
         var geometry = new THREE.PlaneGeometry(width, height);
-        const texture = new THREE.TextureLoader().load( './src/textures/water.png' );
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(100,50);
-        const material = new THREE.MeshPhongMaterial( { map: texture} );
-        // const material = new THREE.MeshPhongMaterial({color: "#36abff", side: THREE.DoubleSide});
+        const material = new THREE.MeshPhongMaterial({color: "#353D3C"});
         const plane = new THREE.Mesh( geometry, material );
         plane.position.y = floory;
         plane.rotation.x = -Math.PI/2;
@@ -112,37 +107,125 @@ class SeedScene extends Scene {
 
     populateScene() {
         // TODO: add logs / cars / ...
-
-        // placeholder cubes
-        for (var i = gridMinX; i <= gridMaxX; i++) {
-            var hitBoxArray = [];
-            for(var j = 0; j < 5; j++) {
-                // Alternate between grass and water
-                var cube, type;
-                if(i % 2 == 0){
-                    cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
-                    type = "grass";
-                }
-                else {
-                    cube = this.makeCube(0x2300ff , i * gridsize, j * gridsize);
-                    type = "water";
-                }
-
-                // Floor does not need hit box
-                /*
-                // Floor cube hitBox
-                var hitBox = new THREE.Box3().setFromObject(cube);
-
-                // HITBOX VISUAL
-                var visualBox = new THREE.Box3Helper(hitBox);
-                this.add(visualBox);
-                */
-                
-                // Add row of hitboxes and type of floor (maybe "floor" for non-game ending stuff like grass and
-                // roads, then "water", "lava", etc.)
-                hitBoxArray.push(type);
+        var type, typeArray;
+        for(var j = 0; j < 13; j++) {
+            if(j % 3 == 0){
+                // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
+                type = "grass";
+                typeArray = this.makeFloorRow(type, j * gridsize);
+                this.state.floorType.push(typeArray);
             }
-            this.state.floorType.push(hitBoxArray);
+            else if(j % 3 == 1){
+                // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
+                type = "water";
+                typeArray = this.makeFloorRow(type, j * gridsize);
+                this.state.floorType.push(typeArray);
+            }
+            else {
+                // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
+                type = "road";
+                typeArray = this.makeFloorRow(type, j * gridsize);
+                this.state.floorType.push(typeArray);
+            }
+
+            // var hitBoxArray = [];
+            // for (var i = gridMinX; i <= gridMaxX; i++) {
+            //     // Alternate between grass and water
+            //     var cube, type;
+            //     if(j % 3 == 0){
+            //         cube = this.makeCube(0x2300ff, i * gridsize, j * gridsize);
+            //         type = "grass";
+            //     } else if(j % 3 == 1){
+            //         // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
+            //         type = "water";
+            //         cube = this.makeFloorCube(type, i * gridsize, j * gridsize);
+            //     } else {
+            //         cube = this.makeCube(0x696362 , i * gridsize, j * gridsize);
+            //         type = "road";
+            //     }
+
+            //     // Floor does not need hit box
+            //     /*
+            //     // Floor cube hitBox
+            //     var hitBox = new THREE.Box3().setFromObject(cube);
+
+            //     // HITBOX VISUAL
+            //     var visualBox = new THREE.Box3Helper(hitBox);
+            //     this.add(visualBox);
+            //     */
+                
+            //     // Add row of hitboxes and type of floor (maybe "floor" for non-game ending stuff like grass and
+            //     // roads, then "water", "lava", etc.)
+            //     hitBoxArray.push(type);
+            // }
+            // this.state.floorType.push(hitBoxArray);
+        }
+    }
+
+    makeFloorRow(type, z) {
+        if(type === "grass") {
+
+            for (var i = gridMinX; i <= gridMaxX; i++) {
+                this.makeCube("#008013", i * gridsize, z);
+            }
+            // const boxWidth = (gridMaxX-gridMinX)*gridsize;
+            // const boxHeight = 1;
+            // const boxDepth = gridsize;
+            // const x = (gridMinX+gridMaxX)*gridsize/2;
+            // const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+            // const material = new THREE.MeshPhongMaterial({color:"#008013"});
+
+            // const cube = new THREE.Mesh(geometry, material);
+            // this.add(cube);
+            // cube.position.x = x;
+            // cube.position.y = floory+boxHeight/2;
+            // cube.position.z = z;
+            // cube.castShadow = true;
+            // cube.receiveShadow = true;
+            var typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
+            return typeArray;
+        }
+        else if(type === "water") {
+            var typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
+            const boxWidth = (gridMaxX-gridMinX)*gridsize;
+            const boxHeight = 1;
+            const boxDepth = gridsize;
+            const x = (gridMinX+gridMaxX)*gridsize/2;
+            const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+            const texture = new THREE.TextureLoader().load( './src/textures/water.png' );
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(10,1);
+            const material = new THREE.MeshPhongMaterial( { map: texture} );
+
+            const cube = new THREE.Mesh(geometry, material);
+            this.add(cube);
+            cube.position.x = x;
+            cube.position.y = floory+boxHeight/2-0.3;
+            cube.position.z = z;
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+
+            return typeArray;
+        }
+        else if (type === "road"){
+            var typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
+            const boxWidth = (gridMaxX-gridMinX)*gridsize;
+            const boxHeight = 0.9;
+            const boxDepth = gridsize;
+            const x = (gridMinX+gridMaxX)*gridsize/2;
+            const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+            const material = new THREE.MeshPhongMaterial({color:0x696362});
+
+            const cube = new THREE.Mesh(geometry, material);
+            this.add(cube);
+            cube.position.x = x;
+            cube.position.y = floory+boxHeight/2;
+            cube.position.z = z;
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+
+            return typeArray;
         }
     }
 
@@ -172,20 +255,12 @@ class SeedScene extends Scene {
         const {character} = this.state;
         if (e.which == 87) { // w
             character.addToJumpQueue(1);
-            // character.jump(0, gridsize);
-            // this.moveCamera(0, gridsize);
         } else if (e.which == 65) { // a 
             character.addToJumpQueue(2);
-            // character.jump(gridsize, 0);
-            // this.moveCamera(gridsize, 0);
         } else if (e.which == 83) { // s
             character.addToJumpQueue(3);
-            // character.jump(0, -gridsize);
-            // this.moveCamera(0, -gridsize);
         }  else if (e.which == 68) { // d
             character.addToJumpQueue(4);
-            // character.jump(-gridsize, 0);
-            // this.moveCamera(-gridsize, 0);
         }
     }
 
@@ -241,17 +316,17 @@ class SeedScene extends Scene {
             var z = Math.round(this.state.character.position.z / gridsize);
 
             // Check if position is not in range of floor grid
-            if(x < 0 || z < 0 || x > this.state.floorType.length || z > this.state.floorType[0].length) {
+            if(x < 0 || z < 0 || x > this.state.floorType[0].length || z > this.state.floorType.length) {
                 debugger;
             }
-
-            var floorType = this.state.floorType[x][z];
-            var charHitBox = this.state.character.state.hitBox;
 
             // Check if floor is undefined
-            if(floorType == undefined) {
+            if(this.state.floorType[z] == undefined || this.state.floorType[z][x] == undefined) {
                 debugger;
             }
+
+            var floorType = this.state.floorType[z][x];
+            var charHitBox = this.state.character.state.hitBox;
 
             // Change character hitbox;
             var visualBox;
@@ -265,6 +340,9 @@ class SeedScene extends Scene {
                 // Add character state to check if character is on log
                 visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }
+            else if(floorType === "road") {
+                visualBox = new THREE.Box3Helper(charHitBox, 0x000000);
+            }
 
             // Update hitBox color
             this.remove(this.state.visualCharHitBox);
@@ -273,24 +351,24 @@ class SeedScene extends Scene {
         }
     }
 
-    makeCar(color, x, z) {
-        const boxWidth = gridsize-0.2;
-        const boxHeight = 0.5;
-        const boxDepth = gridsize-1;
-        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-        const material = new THREE.MeshPhongMaterial({color});
+    // makeCar(color, x, z) {
+    //     const boxWidth = gridsize-0.2;
+    //     const boxHeight = 0.5;
+    //     const boxDepth = gridsize-1;
+    //     const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+    //     const material = new THREE.MeshPhongMaterial({color});
        
-        const car = new THREE.Mesh(geometry, material);
-        this.add(car);
+    //     const car = new THREE.Mesh(geometry, material);
+    //     this.add(car);
        
-        car.position.x = x;
-        car.position.y = (floory+gridsize) / 2;
-        car.position.z = z;
-        car.castShadow = true;
-        car.receiveShadow = true;
+    //     car.position.x = x;
+    //     car.position.y = (floory+gridsize) / 2;
+    //     car.position.z = z;
+    //     car.castShadow = true;
+    //     car.receiveShadow = true;
 
-        return car;
-    }
+    //     return car;
+    // }
 
     makeCarGltf(type, x, z, side) {
         if(type==1) {
