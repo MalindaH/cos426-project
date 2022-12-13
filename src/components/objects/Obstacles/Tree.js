@@ -7,6 +7,13 @@ const floory = -1;
 const gridsize = 2;
 const charStartX = 10;
 
+const boxWidth = 1.5*gridsize;
+const boxHeight = 3.5;
+const boxDepth = gridsize;
+const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+const material = new THREE.MeshPhongMaterial(0xff9e00);
+const box = new THREE.Mesh(geometry, material);
+
 class Tree extends Group {
     constructor(parent, x, z, scale, side) {
         // Call parent Group() constructor
@@ -28,17 +35,11 @@ class Tree extends Group {
                     node.castShadow = true;
                 }
             } );
-            if(side==0) {
+            if(side==1) {
                 gltf.scene.rotation.y = Math.PI;
             }
         });
 
-        const boxWidth = 1.5*gridsize;
-        const boxHeight = 3.5;
-        const boxDepth = gridsize;
-        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-        const material = new THREE.MeshPhongMaterial(0xff9e00);
-        const box = new THREE.Mesh(geometry, material);
         box.position.x = x-1;
         box.position.y = floory+1+boxHeight/2;
         box.position.z = z;
@@ -56,8 +57,17 @@ class Tree extends Group {
         // parent.addToUpdateList(this);
     }
 
-    update(timeStamp) {
-    }
+    // newTree(x, z, scale, side) {
+    //     var tree = this.clone();
+    //     tree.position.x = x;
+    //     tree.position.z = z;
+    //     tree.scale.set(scale, scale, scale);
+    //     tree.rotation.y = side*Math.PI;
+    //     return tree;
+    // }
+
+    // update(timeStamp) {
+    // }
 }
 
 export default Tree;

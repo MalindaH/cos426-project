@@ -5,6 +5,8 @@ import { BasicLights } from 'lights';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
+const gameOverText = true;
+
 const EPS = 0.001;
 const floory = -1;
 const gridsize = 2;
@@ -18,7 +20,9 @@ const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
 
 const possibleFloorTypes = ["grass", "water", "road"];
-const maxTreePercentage = 0.23;
+const possibleCarTypes = ["GolfCart", "Psafe", "TigerTransit"];
+const carTypeWidths = [2.5, 4, 4.5];
+const maxTreePercentage = 0.25;
 
 const loader = new GLTFLoader();
 
@@ -44,6 +48,7 @@ class SeedScene extends Scene {
             numFloorRowsCreated: 0,
             objsByZ: [], // objsByZ[z]: all objects on grid's z-th row
             prototypeTree: null,
+            isGameOver: false,
         };
         
         this.state.prototypeTree = new Tree(this, charStartX, 0, 0.4, 0);
@@ -108,11 +113,12 @@ class SeedScene extends Scene {
             const type = Math.floor(Math.random()*possibleFloorTypes.length);
             this.makeFloorRow(type, this.state.numFloorRowsCreated * gridsize);
         }
+        // TODO: placeholder for spawning cars
         // Spawn single car in row 3 from right to left
-        if(this.state.cars.length <= 1) { // car type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus)
+        if(this.state.cars.length <= 1) { // car type 0 (golfcart), 1 (psafe), or 2 (tiger transit bus)
             this.spawnCar(1, 2, 0);
             this.spawnCar(2, 3, 1);
-            this.spawnCar(3, 4, 0);
+            this.spawnCar(0, 4, 0);
         }
     }
 
@@ -161,37 +167,6 @@ class SeedScene extends Scene {
         }
         for(var j = 2; j < 13; j++) {
             this.makeFloorRow(Math.floor(Math.random()*3), j * gridsize);
-            // var hitBoxArray = [];
-            // for (var i = gridMinX; i <= gridMaxX; i++) {
-            //     // Alternate between grass and water
-            //     var cube, type;
-            //     if(j % 3 == 0){
-            //         cube = this.makeCube(0x2300ff, i * gridsize, j * gridsize);
-            //         type = "grass";
-            //     } else if(j % 3 == 1){
-            //         // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
-            //         type = "water";
-            //         cube = this.makeFloorCube(type, i * gridsize, j * gridsize);
-            //     } else {
-            //         cube = this.makeCube(0x696362 , i * gridsize, j * gridsize);
-            //         type = "road";
-            //     }
-
-            //     // Floor does not need hit box
-            //     /*
-            //     // Floor cube hitBox
-            //     var hitBox = new THREE.Box3().setFromObject(cube);
-
-            //     // HITBOX VISUAL
-            //     var visualBox = new THREE.Box3Helper(hitBox);
-            //     this.add(visualBox);
-            //     */
-                
-            //     // Add row of hitboxes and type of floor (maybe "floor" for non-game ending stuff like grass and
-            //     // roads, then "water", "lava", etc.)
-            //     hitBoxArray.push(type);
-            // }
-            // this.state.floorType.push(hitBoxArray);
         }
     }
 
@@ -307,6 +282,30 @@ class SeedScene extends Scene {
             cube.position.z = z;
             cube.castShadow = true;
             cube.receiveShadow = true;
+
+            // // TODO: placeholder for spawning cars
+            // const side = Math.floor(Math.random()*2);
+            // const cartype = Math.floor(Math.random()*3);
+            // var carWidth = carTypeWidths[cartype];
+            // var xx;
+            // if(side == 0) {
+            //     // leftmost position
+            //     // xx = ((gridMaxX - (gridMaxX+charMaxX)/3)*Math.random() + (gridMaxX+charMaxX)/3) *gridsize;
+            //     xx = gridMaxX * gridsize;
+            // }
+            // else if(side == 1) {
+            //     // rightmost position
+            //     xx = gridMinX * gridsize;
+            // }
+            // for(var i=0; i<2+Math.random()*2; i++) {
+            //     // this.spawnCar(Math.floor(Math.random()*3), z/gridsize, Math.floor(Math.random()*2));
+            //     this.spawnCarXZ(cartype, xx, z, side);
+            //     if(side == 0) {
+            //         xx -= carWidth+Math.random()*3+2;
+            //     } else {
+            //         xx += carWidth+Math.random()*3+2;
+            //     }
+            // }
         }
 
         this.state.floorType.push(typeArray);
@@ -335,6 +334,7 @@ class SeedScene extends Scene {
     }
 
     onDocumentKeyDown(e) {
+        if(this.state.isGameOver) return;
         if ( pressed[e.which] ) return;
         pressed[e.which] = true;
 
@@ -457,15 +457,15 @@ class SeedScene extends Scene {
     // }
 
     makeCarGltf(type, x, z, side) {
-        if(type==1) {
+        if(type==0) {
             var golfcart = new GolfCart(this, x, z, side);
             this.add(golfcart);
             return golfcart;
-        } else if(type==2) {
+        } else if(type==1) {
             var psafe = new Psafe(this, x, z, side);
             this.add(psafe);
             return psafe;
-        } else { // type==3
+        } else { // type==2
             var tigertransit = new TigerTransit(this, x, z, side);
             this.add(tigertransit);
             return tigertransit;
@@ -475,9 +475,11 @@ class SeedScene extends Scene {
     // Spawn car with type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus), z position 
     // along the grid to start, and starting side (0 for left, 1 for right)
     spawnCar(type, z, side) {
-        var x ,car;
+        var x, car;
         if(side == 0) {
             // Change number to leftmost position
+            // x = ((gridMaxX - (gridMaxX+charMaxX)/3)*Math.random() + (gridMaxX+charMaxX)/3) *gridsize;
+            // console.log(x);
             x = gridMaxX * gridsize;
         }
         else if(side == 1) {
@@ -488,6 +490,23 @@ class SeedScene extends Scene {
         // Add if statements with types to change car model
         // var car = this.makeCar(0xff9e00, x, z * gridsize);
         var car = this.makeCarGltf(type, x, z * gridsize, side);
+        var hitBox = car.state.hitBox;
+
+        // Add hitBox
+        // var hitBox = new THREE.Box3().setFromObject(car);
+        var visual = new THREE.Box3Helper(hitBox, 0xffffff);
+        this.add(visual);
+
+        // Push cars into array of cars currently in scene
+        this.state.cars.push({car: car, type: type, side: side, hitBox: hitBox, visual: visual});
+    }
+
+    spawnCarXZ(type, x, z, side) {
+        var car;
+
+        // Add if statements with types to change car model
+        // var car = this.makeCar(0xff9e00, x, z * gridsize);
+        var car = this.makeCarGltf(type, x, z, side);
         var hitBox = car.state.hitBox;
 
         // Add hitBox
@@ -539,21 +558,51 @@ class SeedScene extends Scene {
     }
 
     checkCollisions() {
-        const {cars} = this.state;
+        const {cars, character} = this.state;
         // var cars = this.state.cars;
         for(var i = 0; i < cars.length; i++) {
             var posZ = cars[i].car.position.z;
-            var char = this.state.character;
 
             // If car is not in the same lane as character, then dont check for collisions
-            if(posZ != Math.round(char.position.z)) {
+            if(posZ != Math.round(character.position.z)) {
                 continue;
             }
 
             // Check if car intersects character
             var hitBox = cars[i].hitBox;
-            if(char.state.hitBox.intersectsBox(hitBox)) {
-                var visualBox = new THREE.Box3Helper(char.state.hitBox, 0xff0000);
+            if(character.state.hitBox.intersectsBox(hitBox)) {
+                // game over handling
+                this.state.isGameOver = true;
+                var xDist = 1;
+                var zDist = 1;
+                // var EPS = 0.15;
+                // if(character.state.hitBox.min.x-hitBox.max.x<=EPS || hitBox.min.x-character.state.hitBox.max.x<=EPS) {
+                if(Math.max(character.state.hitBox.min.x-hitBox.max.x, hitBox.min.x-character.state.hitBox.max.x) <= EPS) {
+                    xDist = Math.max(character.state.hitBox.min.x-hitBox.max.x, hitBox.min.x-character.state.hitBox.max.x);
+                // } else if(character.state.hitBox.min.z-hitBox.max.z<=EPS || hitBox.min.z-character.state.hitBox.max.z<=EPS) {
+                } 
+                if (Math.max(character.state.hitBox.min.z-hitBox.max.z, hitBox.min.z-character.state.hitBox.max.z)<=EPS) {
+                    zDist = Math.max(character.state.hitBox.min.z-hitBox.max.z, hitBox.min.z-character.state.hitBox.max.z);
+                }
+                // console.log(xDist, zDist);
+                character.die(xDist>zDist);
+                // const xDist = Math.abs(Math.min(
+                //     // hitBox.max.x-character.state.hitBox.max.x, 
+                //     character.state.hitBox.min.x-hitBox.max.x, 
+                //     hitBox.min.x-character.state.hitBox.max.x
+                //     // hitBox.min.x-character.state.hitBox.min.x
+                //     ));//  (hitBox.max.x+hitBox.min.x)/2 - (character.state.hitBox.max.x+character.state.hitBox.min.x)/2);
+                // const zDist = Math.abs(Math.min(hitBox.max.z-character.state.hitBox.max.z, 
+                //     hitBox.max.z-character.state.hitBox.min.z, 
+                //     hitBox.min.z-character.state.hitBox.max.z, 
+                //     hitBox.min.z-character.state.hitBox.min.z)); // Math.abs((hitBox.max.z+hitBox.min.z)/2 - (character.state.hitBox.max.z+character.state.hitBox.min.z)/2);
+                // // or inside
+                // character.die(xDist > zDist);
+                if(gameOverText) {
+
+                }
+
+                var visualBox = new THREE.Box3Helper(character.state.hitBox, 0xff0000);
                 this.remove(this.state.visualCharHitBox);
                 this.state.visualCharHitBox = visualBox;
                 this.add(visualBox);

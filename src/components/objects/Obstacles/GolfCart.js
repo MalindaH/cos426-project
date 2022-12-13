@@ -7,6 +7,13 @@ const floory = -1;
 const gridsize = 2;
 const charStartX = 10;
 
+const boxWidth = gridsize+0.5;
+const boxHeight = 1.7;
+const boxDepth = gridsize-1;
+const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+const material = new THREE.MeshPhongMaterial(0xff9e00);
+const box = new THREE.Mesh(geometry, material);
+
 class GolfCart extends Group {
     constructor(parent, x, z, side) {
         // Call parent Group() constructor
@@ -36,12 +43,6 @@ class GolfCart extends Group {
             }
         });
 
-        const boxWidth = gridsize+0.5;
-        const boxHeight = 1.7;
-        const boxDepth = gridsize-1;
-        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-        const material = new THREE.MeshPhongMaterial(0xff9e00);
-        const box = new THREE.Mesh(geometry, material);
         box.position.x = x;
         box.position.y = floory+1+boxHeight/2;
         box.position.z = z;
@@ -59,21 +60,11 @@ class GolfCart extends Group {
         this.state.hitBox = hitBox;
 
         // Add self to parent's update list
-        parent.addToUpdateList(this);
+        // parent.addToUpdateList(this);
     }
 
-    update(timeStamp) {
-        // // Previous position
-        // var prevPos = this.position.clone();
-        
-        // // Position offset
-        // var posOff = this.position.clone().sub(prevPos);
-        
-        // //Round x and z coords
-        // posOff.setX = Math.round(posOff.x);
-        // posOff.setZ = Math.round(posOff.z);
-        // this.state.hitBox.translate(posOff);
-    }
+    // update(timeStamp) {
+    // }
 }
 
 export default GolfCart;

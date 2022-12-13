@@ -106,6 +106,7 @@ text2.style.transform = "translate(-50%,-50%)";
 text2.style.whiteSpace = "nowrap";
 document.body.appendChild(text2);
 
+// score
 var text1 = document.createElement('div');
 text1.innerHTML = "1";
 text1.style.fontSize = "6vw";
@@ -117,6 +118,19 @@ text1.style.position = 'absolute';
 text1.style.top = "0%";
 text1.style.transform = "translate(50%)";
 text1.style.whiteSpace = "nowrap";
+
+// game over
+var text3 = document.createElement('div');
+text3.innerHTML = "GAME OVER";
+text3.style.fontSize = "6vw";
+text3.style.fontFamily = "Impact,Charcoal,sans-serif";
+text3.style.textShadow = "-0.2vw -0.2vw 0 #ff6600, 0.2vw -0.2vw 0 #ff6600, -0.2vw 0.2vw 0 #ff6600, 0.2vw 0.2vw 0 #ff6600";
+text3.style.width = 300;
+text3.style.height = 300;
+text3.style.position = 'absolute';
+text3.style.top = "0%";
+text3.style.transform = "translate(50%)";
+text3.style.whiteSpace = "nowrap";
 
 function render() {
     for ( let ii = 0; ii < views.length; ++ ii ) {
@@ -183,8 +197,10 @@ window.addEventListener('resize', windowResizeHandler, false);
 
 
 document.addEventListener("keydown", (event) => {
+    if(scene.state.isGameOver) {
+        location.reload();
+    }
     if(!gameStarted && (event.which == 87 || event.which == 65 || event.which == 83 || event.which == 68) ) {
-        // document.body.removeChild(text2);
         gameStarted = true;
     }
     if(event.which == 87) { // w

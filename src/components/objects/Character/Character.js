@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 // import MODEL from './mallard/scene.gltf';
 
+const EPS = 0.001;
 const floory = -1;
 const jumpTimeTotal = 15;
 const gridsize = 2;
@@ -33,6 +34,9 @@ class Character extends Group {
             zPos: 0,
             hitBox: null,
             charObject: null,
+            isGameOver: false,
+            toDieX: 0,
+            toDieZ: 0,
         };
 
         // Load object
@@ -106,99 +110,122 @@ class Character extends Group {
         }
     }
 
-    update(timeStamp) {
-        const EPS = 0.001;
-        if(this.state.sqeeze > EPS) {
-            this.state.sqeeze -= 0.1;
-            this.scale.set(1,this.scale.y-0.1,1);
-        }
-        if(this.state.sqeeze>-EPS && this.state.sqeeze<EPS && this.state.unsqeeze > EPS) {
-            this.state.unsqeeze -= 0.1;
-            this.scale.set(1,this.scale.y+0.1,1);
-        }
-
-        // add jump from queue
-        if(!this.state.jumping && this.state.sqeeze<EPS && this.state.unsqeeze<EPS && this.state.jumpQueue.length>0) {
-            // console.log(this.state.sqeeze,this.state.unsqeeze, this.state.jumpQueue);
-            switch(this.state.jumpQueue.shift()) { // delete first element from array
-                case 1: //"forward"
-                    this.state.sqeeze=0.3; // lower a bit while turning, before jumping
-                    this.state.unsqeeze=0.3;
-                    this.rotation.y = 0;
-                    this.jump(0, gridsize);
-                    break;
-                case 2: //"left"
-                    this.state.sqeeze=0.3;
-                    this.state.unsqeeze=0.3;
-                    this.rotation.y = Math.PI/2;
-                    this.jump(gridsize, 0);
-                    break;
-                case 3: //"backward"
-                    this.state.sqeeze=0.3;
-                    this.state.unsqeeze=0.3;
-                    this.rotation.y = Math.PI;
-                    this.jump(0, -gridsize);
-                    break;
-                case 4: //"right"
-                    this.state.sqeeze=0.3;
-                    this.state.unsqeeze=0.3;
-                    this.rotation.y = -Math.PI/2;
-                    this.jump(-gridsize, 0);
-                    break;
-            }
-        }
-
-        // Previous position
-        var prevPos = this.position.clone();
-
-        // execute jump animation
-        if(!this.state.jumping && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
-            this.state.jumping = true;
-            if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
-                this.state.jumpSpeed = this.state.jumpMovex/jumpTimeTotal;
-                this.position.x += this.state.jumpSpeed;
-                this.state.jumpMovex -= this.state.jumpSpeed;
-            }
-            if(this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS) {
-                this.state.jumpSpeed = this.state.jumpMovez/jumpTimeTotal;
-                this.position.z += this.state.jumpSpeed;
-                this.state.jumpMovez -= this.state.jumpSpeed;
-            }
-            this.state.jumpTimeElapsed += 1;
-            this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
-        } else if(this.state.jumping) {
-            if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
-                this.state.jumping = false;
-                this.state.jumpTime = 0;
-                this.state.jumpTimeElapsed = 0;
-                this.state.jumpMovex = 0;
-                this.state.jumpMovez = 0;
-                this.state.cubeIndex++;
-                // this.checkLand();
+    die(horizontal) {
+        if(!this.state.isGameOver) {
+            this.state.isGameOver = true;
+            const facingLeftRight = this.rotation.y == Math.PI/2 || this.rotation.y == -Math.PI/2;
+            if((horizontal && !facingLeftRight) || (!horizontal && facingLeftRight)) {
+                this.state.toDieX = 0.8;
+                // this.scale.set(0.2, 1, 1);
             } else {
-                this.state.jumpTimeElapsed += 1;
-                this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
+                this.state.toDieZ = 0.8;
+                // this.scale.set(1, 1, 0.2);
+            }
+        }
+    }
+
+    update(timeStamp) {
+        if(this.state.toDieX > EPS) {
+            this.state.toDieX -= 0.4;
+            this.scale.x -= 0.4;
+        } else if(this.state.toDieZ > EPS) {
+            this.state.toDieZ -= 0.4;
+            this.scale.z -= 0.4;
+        }
+
+        if(!this.state.isGameOver) {
+            if(this.state.sqeeze > EPS) {
+                this.state.sqeeze -= 0.1;
+                this.scale.set(1,this.scale.y-0.1,1);
+            }
+            if(this.state.sqeeze>-EPS && this.state.sqeeze<EPS && this.state.unsqeeze > EPS) {
+                this.state.unsqeeze -= 0.1;
+                this.scale.set(1,this.scale.y+0.1,1);
+            }
+    
+            // add jump from queue
+            if(!this.state.jumping && this.state.sqeeze<EPS && this.state.unsqeeze<EPS && this.state.jumpQueue.length>0) {
+                // console.log(this.state.sqeeze,this.state.unsqeeze, this.state.jumpQueue);
+                switch(this.state.jumpQueue.shift()) { // delete first element from array
+                    case 1: //"forward"
+                        this.state.sqeeze=0.3; // lower a bit while turning, before jumping
+                        this.state.unsqeeze=0.3;
+                        this.rotation.y = 0;
+                        this.jump(0, gridsize);
+                        break;
+                    case 2: //"left"
+                        this.state.sqeeze=0.3;
+                        this.state.unsqeeze=0.3;
+                        this.rotation.y = Math.PI/2;
+                        this.jump(gridsize, 0);
+                        break;
+                    case 3: //"backward"
+                        this.state.sqeeze=0.3;
+                        this.state.unsqeeze=0.3;
+                        this.rotation.y = Math.PI;
+                        this.jump(0, -gridsize);
+                        break;
+                    case 4: //"right"
+                        this.state.sqeeze=0.3;
+                        this.state.unsqeeze=0.3;
+                        this.rotation.y = -Math.PI/2;
+                        this.jump(-gridsize, 0);
+                        break;
+                }
+            }
+    
+            // Previous position
+            var prevPos = this.position.clone();
+    
+            // execute jump animation
+            if(!this.state.jumping && this.state.unsqeeze<EPS && (this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS || this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS)) {
+                this.state.jumping = true;
                 if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
+                    this.state.jumpSpeed = this.state.jumpMovex/jumpTimeTotal;
                     this.position.x += this.state.jumpSpeed;
                     this.state.jumpMovex -= this.state.jumpSpeed;
                 }
                 if(this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS) {
+                    this.state.jumpSpeed = this.state.jumpMovez/jumpTimeTotal;
                     this.position.z += this.state.jumpSpeed;
                     this.state.jumpMovez -= this.state.jumpSpeed;
                 }
+                this.state.jumpTimeElapsed += 1;
+                this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
+            } else if(this.state.jumping) {
+                if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
+                    this.state.jumping = false;
+                    this.state.jumpTime = 0;
+                    this.state.jumpTimeElapsed = 0;
+                    this.state.jumpMovex = 0;
+                    this.state.jumpMovez = 0;
+                    this.state.cubeIndex++;
+                    // this.checkLand();
+                } else {
+                    this.state.jumpTimeElapsed += 1;
+                    this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
+                    if(this.state.jumpMovex>EPS || this.state.jumpMovex<-EPS) {
+                        this.position.x += this.state.jumpSpeed;
+                        this.state.jumpMovex -= this.state.jumpSpeed;
+                    }
+                    if(this.state.jumpMovez>EPS || this.state.jumpMovez<-EPS) {
+                        this.position.z += this.state.jumpSpeed;
+                        this.state.jumpMovez -= this.state.jumpSpeed;
+                    }
+                }
             }
+            
+            // Position offset
+            var posOff = this.position.clone().sub(prevPos);
+            
+            //Round x and z coords
+            posOff.setX = Math.round(posOff.x);
+            posOff.setZ = Math.round(posOff.z);
+            this.state.hitBox.translate(posOff);
+    
+            // Advance tween animations, if any exist
+            // TWEEN.update();
         }
-        
-        // Position offset
-        var posOff = this.position.clone().sub(prevPos);
-        
-        //Round x and z coords
-        posOff.setX = Math.round(posOff.x);
-        posOff.setZ = Math.round(posOff.z);
-        this.state.hitBox.translate(posOff);
-
-        // Advance tween animations, if any exist
-        // TWEEN.update();
     }
 }
 
