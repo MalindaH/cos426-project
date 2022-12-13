@@ -8,6 +8,8 @@ const floory = -1;
 const jumpTimeTotal = 15;
 const gridsize = 2;
 const charStartX = 10;
+const charMinX = 0;
+const charMaxX = 10;
 
 class Character extends Group {
     constructor(parent) {
@@ -16,7 +18,8 @@ class Character extends Group {
 
         // Init state
         this.state = {
-            gui: parent.state.gui,
+            // gui: parent.state.gui,
+            parent: parent,
             jumping: false,
             jumpQueue: [],
             jumpMovex: 0,
@@ -89,9 +92,17 @@ class Character extends Group {
         // character only allowed to jump 5 times from center
         const EPS = 0.001;
         // if(this.position.x + movex >= -6*gridsize-EPS && this.position.x + movex <= 6*gridsize+EPS && this.position.z + movez >= -EPS) {
-        if(this.position.x + movex >= -1*gridsize-EPS && this.position.x + movex <= 10*gridsize+EPS && this.position.z + movez >= -EPS) {
-            this.state.jumpMovex = movex;
-            this.state.jumpMovez = movez;
+        if(this.position.x + movex >= charMinX*gridsize-EPS && this.position.x + movex <= charMaxX*gridsize+EPS && this.position.z + movez >= -EPS) {
+            const gridX = Math.round((this.position.x + movex)/gridsize);
+            const gridZ = Math.round((this.position.z + movez)/gridsize);
+            const {floorType} = this.state.parent.state;
+            console.log(this.position, gridX, gridZ, floorType[gridZ]);
+            if(floorType[gridZ] != undefined && floorType[gridZ][gridX] != undefined) {
+                if(floorType[gridZ][gridX] != 0) {
+                    this.state.jumpMovex = movex;
+                    this.state.jumpMovez = movez;
+                }
+            }
         }
     }
 
@@ -163,7 +174,7 @@ class Character extends Group {
                 this.state.jumpMovex = 0;
                 this.state.jumpMovez = 0;
                 this.state.cubeIndex++;
-                this.checkLand();
+                // this.checkLand();
             } else {
                 this.state.jumpTimeElapsed += 1;
                 this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
@@ -188,17 +199,6 @@ class Character extends Group {
 
         // Advance tween animations, if any exist
         // TWEEN.update();
-    }
-
-    checkLand() {
-        // const {cubes, cubeIndex} = this.state; // box is 2x2
-        // // console.log(cubes[cubeIndex]);
-        // if(this.position.x>=cubes[cubeIndex][0]-1 && this.position.x<=cubes[cubeIndex][0]+1 
-        //     && this.position.z>=cubes[cubeIndex][1]-1 && this.position.z<=cubes[cubeIndex][1]+1) {
-        //         console.log("landed");
-        //     } else {
-        //         console.log("game over");
-        //     }
     }
 }
 

@@ -1,17 +1,24 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
-import { Flower, Land, Character, GolfCart, Psafe, TigerTransit } from 'objects';
-import { BasicLights, OrthoCamera } from 'lights';
+import { Flower, Land, Character, GolfCart, Psafe, TigerTransit, Tree } from 'objects';
+import { BasicLights } from 'lights';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
+const EPS = 0.001;
 const floory = -1;
 const gridsize = 2;
 const gridMinX = -8;
 const gridMaxX = 18;
-const charStartX = 10;
+const charMinX = 0;
+const charMaxX = 10; // grid coordinate
+
+const charStartX = 10; // coordinate
 const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
+
+const possibleFloorTypes = ["grass", "water", "road"];
+const maxTreePercentage = 0.25;
 
 const loader = new GLTFLoader();
 
@@ -31,9 +38,10 @@ class SeedScene extends Scene {
             camerasOrigX: [camera1.position.x, camera2.position.x],
             camerasOrigZ: [camera1.position.z, camera2.position.z],
             lights: null,
-            floorType: [],
+            floorType: [], // floorType[z][x], correspond to the part of grid that character is allowed to reach x=[charMinX, charMaxX], z=[0,...)
             visualCharHitBox: null,
             cars: [],
+            numFloorRowsCreated: 0,
         };
 
         // Set background to a nice color
@@ -73,12 +81,7 @@ class SeedScene extends Scene {
             obj.update(timeStamp);
         }
 
-        // Spawn single car in row 3 from right to left
-        if(this.state.cars.length <= 1) { // car type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus)
-            this.spawnCar(1, 2, 0);
-            this.spawnCar(2, 3, 1);
-            this.spawnCar(3, 4, 0);
-        }
+        this.updatePopulateScene();
 
         // Check floor under player
         this.checkFloor();
@@ -91,6 +94,19 @@ class SeedScene extends Scene {
 
         // Check for game over 
         
+    }
+
+    updatePopulateScene() {
+        if(this.state.character.position.z*2+13+EPS > this.state.numFloorRowsCreated) {
+            const type = Math.floor(Math.random()*possibleFloorTypes.length);
+            this.makeFloorRow(type, this.state.numFloorRowsCreated * gridsize);
+        }
+        // Spawn single car in row 3 from right to left
+        if(this.state.cars.length <= 1) { // car type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus)
+            this.spawnCar(1, 2, 0);
+            this.spawnCar(2, 3, 1);
+            this.spawnCar(3, 4, 0);
+        }
     }
 
     makeFloor() {
@@ -109,25 +125,7 @@ class SeedScene extends Scene {
         // TODO: add logs / cars / ...
         var type, typeArray;
         for(var j = 0; j < 13; j++) {
-            if(j % 3 == 0){
-                // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
-                type = "grass";
-                typeArray = this.makeFloorRow(type, j * gridsize);
-                this.state.floorType.push(typeArray);
-            }
-            else if(j % 3 == 1){
-                // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
-                type = "water";
-                typeArray = this.makeFloorRow(type, j * gridsize);
-                this.state.floorType.push(typeArray);
-            }
-            else {
-                // cube = this.makeCube(0x44aa88, i * gridsize, j * gridsize);
-                type = "road";
-                typeArray = this.makeFloorRow(type, j * gridsize);
-                this.state.floorType.push(typeArray);
-            }
-
+            this.makeFloorRow(j % 3, j * gridsize);
             // var hitBoxArray = [];
             // for (var i = gridMinX; i <= gridMaxX; i++) {
             //     // Alternate between grass and water
@@ -163,10 +161,22 @@ class SeedScene extends Scene {
     }
 
     makeFloorRow(type, z) {
-        if(type === "grass") {
-
+        var typeArray = [];
+        if(type === 0) { // grass
             for (var i = gridMinX; i <= gridMaxX; i++) {
                 this.makeCube("#008013", i * gridsize, z);
+                if(i<charMinX || i>charMaxX) {
+                    var tree = new Tree(this, i * gridsize, z, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
+                    this.add(tree);
+                } else {
+                    if (Math.random() <= maxTreePercentage) {
+                        var tree = new Tree(this, i * gridsize, z, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
+                        this.add(tree);
+                        typeArray.push(0); // has tree
+                    } else {
+                        typeArray.push(0.5); // no tree
+                    }
+                }
             }
             // const boxWidth = (gridMaxX-gridMinX)*gridsize;
             // const boxHeight = 1;
@@ -182,11 +192,10 @@ class SeedScene extends Scene {
             // cube.position.z = z;
             // cube.castShadow = true;
             // cube.receiveShadow = true;
-            var typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
-            return typeArray;
+            // typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
         }
-        else if(type === "water") {
-            var typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
+        else if(type === 1) { // water
+            typeArray = Array((charMaxX-charMinX+1)*gridsize).fill(type);
             const boxWidth = (gridMaxX-gridMinX)*gridsize;
             const boxHeight = 1;
             const boxDepth = gridsize;
@@ -205,11 +214,9 @@ class SeedScene extends Scene {
             cube.position.z = z;
             cube.castShadow = true;
             cube.receiveShadow = true;
-
-            return typeArray;
         }
-        else if (type === "road"){
-            var typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
+        else if (type === 2){ // road
+            typeArray = Array((charMaxX-charMinX+1)*gridsize).fill(type);
             const boxWidth = (gridMaxX-gridMinX)*gridsize;
             const boxHeight = 0.9;
             const boxDepth = gridsize;
@@ -224,9 +231,11 @@ class SeedScene extends Scene {
             cube.position.z = z;
             cube.castShadow = true;
             cube.receiveShadow = true;
-
-            return typeArray;
         }
+
+        this.state.floorType.push(typeArray);
+        this.state.numFloorRowsCreated++;
+        return typeArray;
     }
 
     makeCube(color, x, z) {
@@ -333,14 +342,14 @@ class SeedScene extends Scene {
 
             // White outline for grass, blue for water
             // Demonstrates detection of where character landed so under water, can be game over instead of red hitbox
-            if(floorType === "grass") {
+            if(floorType==0 || floorType==0.5) { // grass
                 visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
             }
-            else if(floorType === "water"){ 
+            else if(floorType === 1){ // water
                 // Add character state to check if character is on log
                 visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }
-            else if(floorType === "road") {
+            else if(floorType === 2) { // road
                 visualBox = new THREE.Box3Helper(charHitBox, 0x000000);
             }
 

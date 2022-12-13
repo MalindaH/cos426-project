@@ -16,8 +16,8 @@ class BasicLights extends Group {
 
         dir.position.set(15, 20, 0);
         dir.target.position.set(0, 0, 0);
-        dir.shadow.camera.right = 3;
-        dir.shadow.camera.left = -20;
+        dir.shadow.camera.right = 30;
+        dir.shadow.camera.left = -25;
         dir.shadow.camera.top = 15;
         dir.shadow.camera.bottom = -30;
         dir.shadow.mapSize.width = 1024;
