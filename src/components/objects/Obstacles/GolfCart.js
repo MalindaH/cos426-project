@@ -46,6 +46,7 @@ class GolfCart extends Group {
         box.position.y = floory+1+boxHeight/2;
         box.position.z = z;
         this.state.charObject = box;
+        box.visible = false;
         // this.add(box);
 
         this.position.x = x;

@@ -18,7 +18,7 @@ const cameraForwardSpeed = 0.01*gridsize;
 const camerasFollowTime = [100, 50];
 
 const possibleFloorTypes = ["grass", "water", "road"];
-const maxTreePercentage = 0.25;
+const maxTreePercentage = 0.23;
 
 const loader = new GLTFLoader();
 
@@ -42,7 +42,12 @@ class SeedScene extends Scene {
             visualCharHitBox: null,
             cars: [],
             numFloorRowsCreated: 0,
+            objsByZ: [], // objsByZ[z]: all objects on grid's z-th row
+            prototypeTree: null,
         };
+        
+        this.state.prototypeTree = new Tree(this, charStartX, 0, 0.4, 0);
+        // this.add(this.state.prototypeTree);
 
         // Set background to a nice color
         this.background = new Color("#ababab");
@@ -92,6 +97,8 @@ class SeedScene extends Scene {
         // Check for collisions between cars
         this.checkCollisions();
 
+        this.deleteUnseenObjects();
+
         // Check for game over 
         
     }
@@ -109,6 +116,32 @@ class SeedScene extends Scene {
         }
     }
 
+    deleteUnseenObjects() {
+        const {objsByZ, cameras} = this.state;
+        const camera = cameras[0];
+        // const ZtoDelete = Math.floor((camera.position.z-14)/2)+6;
+        // if(ZtoDelete>=0 && objsByZ[ZtoDelete]!=undefined && objsByZ[ZtoDelete].length>0) {
+        //     objsByZ[ZtoDelete].forEach(element => {
+        //         this.remove(element);
+        //     });
+        //     objsByZ[ZtoDelete] = [];
+        // }
+
+        var frustum = new THREE.Frustum();
+        frustum.setFromProjectionMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
+        for (var i=0; i<objsByZ.length; i++) {
+            for( var j=0; j<objsByZ[i].length; j++) {
+                var visible = false;
+                if(objsByZ[i][j].state==undefined) {
+                    visible = frustum.intersectsObject(objsByZ[i][j]);
+                } else {
+                    visible = frustum.intersectsBox(objsByZ[i][j].state.hitBox);
+                }
+                objsByZ[i][j].visible = visible;
+            }
+        }
+    }
+
     makeFloor() {
         const width = 900;
         const height = 900;
@@ -122,10 +155,12 @@ class SeedScene extends Scene {
     }
 
     populateScene() {
-        // TODO: add logs / cars / ...
-        var type, typeArray;
-        for(var j = 0; j < 13; j++) {
-            this.makeFloorRow(j % 3, j * gridsize);
+        this.makeGrassRowAtStart(); // grass with extra trees at -z values
+        for(var j = 0; j < 2; j++) {
+            this.makeFloorRow(0, j * gridsize); // grass
+        }
+        for(var j = 2; j < 13; j++) {
+            this.makeFloorRow(Math.floor(Math.random()*3), j * gridsize);
             // var hitBoxArray = [];
             // for (var i = gridMinX; i <= gridMaxX; i++) {
             //     // Alternate between grass and water
@@ -160,18 +195,56 @@ class SeedScene extends Scene {
         }
     }
 
+    makeGrassRowAtStart() { // grass with extra trees, for negative z values that character can't jump to
+        for(var j = -6; j < -4; j++) {
+            var objects = [];
+            for (var i = -2; i <= 12; i++) {
+                var cube = this.makeCube("#008013", i * gridsize, j*gridsize);
+                objects.push(cube);
+                var tree = new Tree(this, i * gridsize, j*gridsize, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
+                // var visualBox = new THREE.Box3Helper(tree.state.hitBox, 0x001bff);
+                // this.add(visualBox);
+                this.add(tree);
+                objects.push(tree);
+            }
+            this.state.objsByZ.push(objects);
+        }
+        for(var j = -4; j < 0; j++) {
+            var objects = [];
+            for (var i = -2; i <= 12; i++) {
+                var cube = this.makeCube("#008013", i * gridsize, j*gridsize);
+                objects.push(cube);
+                if(i<charMinX || i>charMaxX) {
+                    var tree = new Tree(this, i * gridsize, j*gridsize, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
+                    this.add(tree);
+                    objects.push(tree);
+                }
+            }
+            this.state.objsByZ.push(objects);
+        }
+    }
+
     makeFloorRow(type, z) {
         var typeArray = [];
+        var objects = [];
         if(type === 0) { // grass
             for (var i = gridMinX; i <= gridMaxX; i++) {
-                this.makeCube("#008013", i * gridsize, z);
+                var cube = this.makeCube("#008013", i * gridsize, z);
+                objects.push(cube);
                 if(i<charMinX || i>charMaxX) {
                     var tree = new Tree(this, i * gridsize, z, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
+                    // var tree = this.state.prototypeTree.clone();
+                    // tree.position.x = i * gridsize;
+                    // tree.position.z = z;
+                    // const s = 0.5+Math.random()*0.5
+                    // tree.scale.set(s,s,s);
                     this.add(tree);
+                    objects.push(tree);
                 } else {
-                    if (Math.random() <= maxTreePercentage) {
+                    if (!(z<=2 && i*gridsize==charStartX) && Math.random() <= maxTreePercentage) {
                         var tree = new Tree(this, i * gridsize, z, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
                         this.add(tree);
+                        objects.push(tree);
                         typeArray.push(0); // has tree
                     } else {
                         typeArray.push(0.5); // no tree
@@ -204,11 +277,13 @@ class SeedScene extends Scene {
             const texture = new THREE.TextureLoader().load( './src/textures/water.png' );
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
+            texture.minFilter = THREE.LinearFilter;
             texture.repeat.set(10,1);
             const material = new THREE.MeshPhongMaterial( { map: texture} );
 
             const cube = new THREE.Mesh(geometry, material);
             this.add(cube);
+            objects.push(cube);
             cube.position.x = x;
             cube.position.y = floory+boxHeight/2-0.3;
             cube.position.z = z;
@@ -226,6 +301,7 @@ class SeedScene extends Scene {
 
             const cube = new THREE.Mesh(geometry, material);
             this.add(cube);
+            objects.push(cube);
             cube.position.x = x;
             cube.position.y = floory+boxHeight/2;
             cube.position.z = z;
@@ -235,7 +311,8 @@ class SeedScene extends Scene {
 
         this.state.floorType.push(typeArray);
         this.state.numFloorRowsCreated++;
-        return typeArray;
+        this.state.objsByZ.push(objects);
+        // return objects;
     }
 
     makeCube(color, x, z) {
@@ -393,7 +470,6 @@ class SeedScene extends Scene {
             this.add(tigertransit);
             return tigertransit;
         }
-        
     }
 
     // Spawn car with type 1 (golfcart), 2 (psafe), or 3 (tiger transit bus), z position 

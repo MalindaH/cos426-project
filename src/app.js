@@ -33,7 +33,7 @@ const views = [
         cBottom: frustumSize / - 2,
         cNear: -100,
         cFar: 3000,
-        position: [-3+charStartX,7,-5],
+        position: [-3+charStartX,7,-3],
         zoom: 80,
         left: 0,
         bottom: 0,
@@ -78,7 +78,7 @@ for ( let ii = 0; ii < views.length; ++ ii ) {
         controls.enableDamping = true;
         controls.enablePan = true;
         controls.maxPolarAngle = Math.PI/2; // don't allow camera to go below floor
-        controls.target = new Vector3(charStartX, 0, 5);
+        controls.target = new Vector3(charStartX, 0, 7);
         controls.update();
         controls.addEventListener('change', () => {renderer.render(scene, camera)});
     } else {

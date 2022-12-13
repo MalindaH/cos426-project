@@ -51,6 +51,7 @@ class Character extends Group {
         // Create Sphere
         var sphere = this.makeSphere(0xaa33aa, charStartX, 0);
         this.state.charObject = sphere;
+        sphere.visible = false;
         // this.add(sphere);
         
         // Create hitBox from sphere and attach to character
@@ -96,7 +97,6 @@ class Character extends Group {
             const gridX = Math.round((this.position.x + movex)/gridsize);
             const gridZ = Math.round((this.position.z + movez)/gridsize);
             const {floorType} = this.state.parent.state;
-            console.log(this.position, gridX, gridZ, floorType[gridZ]);
             if(floorType[gridZ] != undefined && floorType[gridZ][gridX] != undefined) {
                 if(floorType[gridZ][gridX] != 0) {
                     this.state.jumpMovex = movex;

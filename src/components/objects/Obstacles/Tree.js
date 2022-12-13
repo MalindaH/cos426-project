@@ -14,6 +14,7 @@ class Tree extends Group {
 
         // Init state
         this.state = {
+            hitBox: null,
         };
 
         // Load object
@@ -32,12 +33,27 @@ class Tree extends Group {
             }
         });
 
+        const boxWidth = 1.5*gridsize;
+        const boxHeight = 3.5;
+        const boxDepth = gridsize;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+        const material = new THREE.MeshPhongMaterial(0xff9e00);
+        const box = new THREE.Mesh(geometry, material);
+        box.position.x = x-1;
+        box.position.y = floory+1+boxHeight/2;
+        box.position.z = z;
+        box.visible = false;
+        // this.add(box);
+
         this.position.x = x;
         this.position.z = z;
         this.position.y = (floory+gridsize)/2-0.7;
 
+        var hitBox = new THREE.Box3().setFromObject(box);
+        this.state.hitBox = hitBox;   
+
         // Add self to parent's update list
-        parent.addToUpdateList(this);
+        // parent.addToUpdateList(this);
     }
 
     update(timeStamp) {
