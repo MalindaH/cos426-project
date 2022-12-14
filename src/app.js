@@ -9,11 +9,7 @@
 import { WebGLRenderer, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { SeedScene } from 'scenes';
-// import { OrthoCamera } from 'lights';
 import * as THREE from 'three';
-
-// import Nebula, { SpriteRenderer } from "three-nebula";
-// import json from "./json/particle-system-test.json";
 
 var gameStarted = false;
 var text2Removed = false;
@@ -201,19 +197,6 @@ function render() {
         }
     }
 }
-
-// Nebula.fromJSONAsync(json, THREE).then(loaded => {
-//     // loaded.emitters.forEach(emitter => {
-//     //   emitter.position.y = 11
-//     // })
-  
-//     // const app = getThreeApp();
-//     const nebulaRenderer = new SpriteRenderer(scene, THREE);
-//     const nebula = loaded.addRenderer(nebulaRenderer);
-//     nebula.update();
-//     // animate(nebula, app);
-// });
-
 
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
