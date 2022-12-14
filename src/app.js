@@ -15,6 +15,7 @@ import * as THREE from 'three';
 var gameStarted = false;
 var text2Removed = false;
 var numStepsForward = 0;
+var text3Added = false;
 
 const charStartX = 10;
 const frustumSize = 1500;
@@ -121,16 +122,34 @@ text1.style.whiteSpace = "nowrap";
 
 // game over
 var text3 = document.createElement('div');
-text3.innerHTML = "GAME OVER";
-text3.style.fontSize = "6vw";
-text3.style.fontFamily = "Impact,Charcoal,sans-serif";
-text3.style.textShadow = "-0.2vw -0.2vw 0 #ff6600, 0.2vw -0.2vw 0 #ff6600, -0.2vw 0.2vw 0 #ff6600, 0.2vw 0.2vw 0 #ff6600";
-text3.style.width = 300;
-text3.style.height = 300;
 text3.style.position = 'absolute';
-text3.style.top = "0%";
-text3.style.transform = "translate(50%)";
-text3.style.whiteSpace = "nowrap";
+text3.style.top = "43%";
+text3.style.width = "100%";
+text3.style.background = "#ff781f";
+text3.style.fontFamily = "Impact,Charcoal,sans-serif";
+text3.style.transform = "translateY(-50%)";
+text3.style.textAlign = "center";
+var text4 = document.createElement('div');
+text4.innerHTML = "GAME OVER";
+text4.style.fontSize = "7vw";
+text4.style.textShadow = "0vw 0.2vw 0.5vw rgba(0,0,0,0.4)";
+text3.appendChild(text4);
+
+// Press any key to restart
+var text5 = document.createElement('div');
+text5.style.position = 'absolute';
+text5.style.top = "57%";
+text5.style.width = "100%";
+text5.style.background = "#ff9d5c";
+text5.style.fontFamily = "Impact,Charcoal,sans-serif";
+text5.style.transform = "translateY(-50%)";
+text5.style.textAlign = "center";
+var text6 = document.createElement('div');
+text6.innerHTML = "Press any key to restart";
+text6.style.fontSize = "4vw";
+text6.style.textShadow = "0vw 0.2vw 0.5vw rgba(0,0,0,0.4)";
+text5.appendChild(text6);
+
 
 function render() {
     for ( let ii = 0; ii < views.length; ++ ii ) {
@@ -163,6 +182,17 @@ function render() {
     }
     if(gameStarted) {
         document.body.appendChild(text1);
+    }
+    if(scene.state.isGameOver) {
+        if(!text3Added) {
+            document.body.appendChild(text3);
+            document.body.appendChild(text5);
+        }
+        
+
+        var left = parseInt(text2.style.left.slice(0,-1));
+        // text3.style.left = "90%";
+        // text5.style.left = "90%";
     }
 }
 
