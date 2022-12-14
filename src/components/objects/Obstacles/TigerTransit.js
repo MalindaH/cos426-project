@@ -21,6 +21,7 @@ class TigerTransit extends Group {
 
         // Init state
         this.state = {
+            speed: 12,
             hitBox: null,
             charObject: null,
             // model: null,

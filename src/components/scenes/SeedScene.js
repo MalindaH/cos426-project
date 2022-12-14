@@ -109,7 +109,7 @@ class SeedScene extends Scene {
     }
 
     updatePopulateScene() {
-        if(this.state.character.position.z*2+13+EPS > this.state.numFloorRowsCreated) {
+        if(this.state.character.position.z/2+13+EPS > this.state.numFloorRowsCreated) {
             const type = Math.floor(Math.random()*possibleFloorTypes.length);
             this.makeFloorRow(type, this.state.numFloorRowsCreated * gridsize);
         }
@@ -534,16 +534,7 @@ class SeedScene extends Scene {
             }
 
             // Set speed of car depending on type
-            var speed;
-            if(cars[i].type == 1) {
-                speed = 7;
-            }
-            else if(cars[i].type == 2) {
-                speed = 17;
-            }
-            else if(cars[i].type == 3) {
-                speed = 12;
-            }
+            var speed = cars[i].car.state.speed;
             
             // Flip speed if going from left to right (-x direction)
             if(cars[i].side == 0) {

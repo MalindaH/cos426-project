@@ -12,6 +12,9 @@ import { SeedScene } from 'scenes';
 // import { OrthoCamera } from 'lights';
 import * as THREE from 'three';
 
+// import Nebula, { SpriteRenderer } from "three-nebula";
+// import json from "./json/particle-system-test.json";
+
 var gameStarted = false;
 var text2Removed = false;
 var numStepsForward = 0;
@@ -123,7 +126,7 @@ text1.style.whiteSpace = "nowrap";
 // game over
 var text3 = document.createElement('div');
 text3.style.position = 'absolute';
-text3.style.top = "43%";
+text3.style.top = "37%";
 text3.style.width = "100%";
 text3.style.background = "#ff781f";
 text3.style.fontFamily = "Impact,Charcoal,sans-serif";
@@ -138,7 +141,7 @@ text3.appendChild(text4);
 // Press any key to restart
 var text5 = document.createElement('div');
 text5.style.position = 'absolute';
-text5.style.top = "57%";
+text5.style.top = "52%";
 text5.style.width = "100%";
 text5.style.background = "#ff9d5c";
 text5.style.fontFamily = "Impact,Charcoal,sans-serif";
@@ -187,19 +190,36 @@ function render() {
         if(!text3Added) {
             document.body.appendChild(text3);
             document.body.appendChild(text5);
+            text3.style.left = "100%";
+            text5.style.left = "100%";
+            text3Added = true;
         }
-        
-
-        var left = parseInt(text2.style.left.slice(0,-1));
-        // text3.style.left = "90%";
-        // text5.style.left = "90%";
+        var left = parseInt(text3.style.left.slice(0,-1));
+        if(left>=20) {
+            text3.style.left = (left-20)+"%";
+            text5.style.left = (left-20)+"%";
+        }
     }
 }
+
+// Nebula.fromJSONAsync(json, THREE).then(loaded => {
+//     // loaded.emitters.forEach(emitter => {
+//     //   emitter.position.y = 11
+//     // })
+  
+//     // const app = getThreeApp();
+//     const nebulaRenderer = new SpriteRenderer(scene, THREE);
+//     const nebula = loaded.addRenderer(nebulaRenderer);
+//     nebula.update();
+//     // animate(nebula, app);
+// });
+
 
 // Render loop
 const onAnimationFrameHandler = (timeStamp) => {
     // controls.update();
     // renderer.render(scene, camera);
+    
     render();
     scene.update && scene.update(timeStamp);
     window.requestAnimationFrame(onAnimationFrameHandler);

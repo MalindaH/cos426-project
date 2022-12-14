@@ -3,6 +3,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
 // import MODEL from './mallard/scene.gltf';
+import {ParticleSystem} from 'objects';
 
 const EPS = 0.001;
 const floory = -1;
@@ -11,6 +12,8 @@ const gridsize = 2;
 const charStartX = 10;
 const charMinX = 0;
 const charMaxX = 10;
+
+var lastTimeStep = 0;
 
 class Character extends Group {
     constructor(parent) {
@@ -37,6 +40,7 @@ class Character extends Group {
             isGameOver: false,
             toDieX: 0,
             toDieZ: 0,
+            particlesystem: null,
         };
 
         // Load object
@@ -64,6 +68,9 @@ class Character extends Group {
         this.state.hitBox = hitBox;
 
         this.position.x = charStartX;
+
+        var particlesystem = new ParticleSystem(this, parent.state.cameras[0]);
+        this.state.particlesystem = particlesystem;
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
@@ -125,6 +132,15 @@ class Character extends Group {
     }
 
     update(timeStamp) {
+        if(this.state.isGameOver) {
+            if(lastTimeStep == 0) {
+                lastTimeStep = timeStamp;
+            } else {
+                this.state.particlesystem.Step((timeStamp-lastTimeStep)*0.001, this.position.y+1);
+                lastTimeStep = timeStamp;
+            }
+        }
+
         if(this.state.toDieX > EPS) {
             this.state.toDieX -= 0.4;
             this.scale.x -= 0.4;

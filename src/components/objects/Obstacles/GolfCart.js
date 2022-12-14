@@ -21,6 +21,7 @@ class GolfCart extends Group {
 
         // Init state
         this.state = {
+            speed: 7,
             hitBox: null,
             charObject: null,
             // model: null,
