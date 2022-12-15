@@ -75,8 +75,8 @@ class SeedScene extends Scene {
         const floor = this.makeFloor();
         this.add(lights, character, floor);
 
-        // const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
-        // this.add(cameraHelper);
+        //const cameraHelper = new THREE.CameraHelper(lights.state.dir.shadow.camera);
+        //this.add(cameraHelper);
     }
 
     addToUpdateList(object) {
@@ -123,7 +123,7 @@ class SeedScene extends Scene {
     }
 
     deleteUnseenObjects() {
-        const {objsByZ, cameras} = this.state;
+        const {objsByZ, cameras, cars} = this.state;
         const camera = cameras[0];
         const ZtoDelete = Math.floor((camera.position.z-14)/2)+6;
         if(ZtoDelete>=0 && objsByZ[ZtoDelete]!=undefined && objsByZ[ZtoDelete].length>0) {
@@ -131,6 +131,15 @@ class SeedScene extends Scene {
                 this.remove(element);
             });
             objsByZ[ZtoDelete] = [];
+            for(var i = 0; i < cars.length; i++) {
+                if(cars[i].car.position.z / gridsize <= ZtoDelete) {
+                    cars[i].hitBox = null;
+                    this.remove(cars[i].car);
+                    this.remove(cars[i].visual);
+                    cars.splice(i, 1);
+                    break;
+                }
+            }
         }
 
         var frustum = new THREE.Frustum();
@@ -382,6 +391,14 @@ class SeedScene extends Scene {
         
     }
 
+    // moveCamera(movex, movez) {
+    //     const {camera} = this.state;
+    //     camera.position.x += movex;
+    //     camera.position.z += movez;
+    //     console.log(camera.position);
+    //     this.moveLight(movex, movez);
+    // }
+
     moveLight(movex, movez) {
         const {lights} = this.state;
         // lights.state.dir.position.x += movex;
@@ -430,7 +447,7 @@ class SeedScene extends Scene {
             // White outline for grass, blue for water
             // Demonstrates detection of where character landed so under water, can be game over instead of red hitbox
             if(floorType==0 || floorType==0.5) { // grass
-                visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
+                //visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
             }
             else if(floorType === 1){ // water
                 // check if character is on log
@@ -472,13 +489,15 @@ class SeedScene extends Scene {
                 // visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }
             else if(floorType === 2) { // road
-                visualBox = new THREE.Box3Helper(charHitBox, 0x000000);
+                //visualBox = new THREE.Box3Helper(charHitBox, 0x000000);
             }
 
             // Update hitBox color
+            /*
             this.remove(this.state.visualCharHitBox);
             this.state.visualCharHitBox = visualBox;
             this.add(visualBox);
+            */
         }
     }
 
@@ -539,11 +558,11 @@ class SeedScene extends Scene {
 
         // Add hitBox
         // var hitBox = new THREE.Box3().setFromObject(car);
-        var visual = new THREE.Box3Helper(hitBox, 0xffffff);
-        this.add(visual);
+        // var visual = new THREE.Box3Helper(hitBox, 0xffffff);
+        //this.add(visual);
 
         // Push cars into array of cars currently in scene
-        this.state.cars.push({car: car, type: type, side: side, hitBox: hitBox, visual: visual});
+        this.state.cars.push({car: car, type: type, side: side, hitBox: hitBox, visual: null});
     }
 
     spawnCarXZ(type, x, z, side) {
@@ -556,11 +575,11 @@ class SeedScene extends Scene {
 
         // Add hitBox
         // var hitBox = new THREE.Box3().setFromObject(car);
-        var visual = new THREE.Box3Helper(hitBox, 0xffffff);
-        this.add(visual);
+        // var visual = new THREE.Box3Helper(hitBox, 0xffffff);
+        // this.add(visual);
 
         // Push cars into array of cars currently in scene
-        this.state.cars.push({car: car, type: type, side: side, hitBox: hitBox, visual: visual});
+        this.state.cars.push({car: car, type: type, side: side, hitBox: hitBox, visual: null});
     }
 
     updateCars(timeStamp) {
@@ -626,10 +645,10 @@ class SeedScene extends Scene {
                 }
                 character.die(xDist>zDist);
 
-                var visualBox = new THREE.Box3Helper(character.state.hitBox, 0xff0000);
-                this.remove(this.state.visualCharHitBox);
-                this.state.visualCharHitBox = visualBox;
-                this.add(visualBox);
+                //var visualBox = new THREE.Box3Helper(character.state.hitBox, 0xff0000);
+                //this.remove(this.state.visualCharHitBox);
+                //this.state.visualCharHitBox = visualBox;
+                //this.add(visualBox);
             }
         }
     }

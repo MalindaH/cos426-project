@@ -22,7 +22,7 @@ class Psafe extends Group {
 
         // Init state
         this.state = {
-            speed: 12,
+            speed: 10,
             hitBox: null,
             charObject: null,
             // model: null,

@@ -1,9 +1,11 @@
-import { Group } from 'three';
+import { DoubleSide, Group, Scene } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
 import MODEL from './mallard.gltf';
 import {ParticleSystem} from 'objects';
+import {Howl, Howler} from 'howler';
+import jumpSound from '../../../sounds/jump.mp3';
 
 const EPS = 0.001;
 const floory = -1;
@@ -14,6 +16,8 @@ const charMinX = 0;
 const charMaxX = 10;
 
 var lastTimeStep = 0;
+
+const audioLoader = new THREE.AudioLoader();
 
 class Character extends Group {
     constructor(parent) {
@@ -43,6 +47,7 @@ class Character extends Group {
             toDieZ: 0,
             particlesystem: null,
             isOnLog: false,
+            sound: null,
         };
 
         // Load object
@@ -73,6 +78,14 @@ class Character extends Group {
 
         var particlesystem = new ParticleSystem(this, parent.state.cameras[0]);
         this.state.particlesystem = particlesystem;
+
+        // Audio Listener
+        const listener = new THREE.AudioListener();
+        this.add(listener);
+
+        const sound = new THREE.Audio(listener);
+
+        this.state.sound = sound;
 
         // Add self to parent's update list
         parent.addToUpdateList(this);
@@ -171,6 +184,18 @@ class Character extends Group {
             // add jump from queue
             if(!this.state.jumping && this.state.sqeeze<EPS && this.state.unsqeeze<EPS && this.state.jumpQueue.length>0) {
                 // console.log(this.state.sqeeze,this.state.unsqeeze, this.state.jumpQueue);
+                // Play jump sound
+                var sound = this.state.sound;
+                
+                audioLoader.load( jumpSound, function( buffer ) {
+                    sound.setBuffer( buffer );
+                    sound.setLoop( false );
+                    sound.setVolume( 0.5 );
+                    //AudioContext.getAudioContext().resume();
+                    sound.play();
+                });
+                
+                
                 switch(this.state.jumpQueue.shift()) { // delete first element from array
                     case 1: //"forward"
                         this.state.sqeeze=0.3; // lower a bit while turning, before jumping

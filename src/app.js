@@ -10,6 +10,13 @@ import { WebGLRenderer, Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { SeedScene } from 'scenes';
 import * as THREE from 'three';
+/*
+import Stats from 'stats.js'
+
+const stats = new Stats()
+stats.showPanel(0) // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild(stats.dom)
+*/
 
 var gameStarted = false;
 var text2Removed = false;
@@ -180,6 +187,7 @@ function render() {
         camera.updateProjectionMatrix();
 
         renderer.render( scene, camera );
+        //stats.update();
     }
     if(!text2Removed && gameStarted) {
         var left = parseInt(text02.style.left.slice(0,-1));
