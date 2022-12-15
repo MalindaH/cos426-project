@@ -89,26 +89,32 @@ for ( let ii = 0; ii < views.length; ++ ii ) {
 const scene = new SeedScene(views[0].camera, views[1].camera);
 
 // game title TIGER ROAD
+var text02 = document.createElement('div');
+text02.style.position = 'absolute';
+text02.style.textAlign = "center";
+text02.style.top = "40%";
+text02.style.left = "50%";
 var text2 = document.createElement('div');
-text2.style.justifyContent = "center";
 text2.innerHTML = "TIGER ROAD";
-//text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-text2.style.fontSize = "10vw";
+text2.style.fontSize = "15vw";
 text2.style.fontFamily = "Impact,Charcoal,sans-serif";
 text2.style.textShadow = "-0.3vw -0.3vw 0 #ff6600, 0.3vw -0.3vw 0 #ff6600, -0.3vw 0.3vw 0 #ff6600, 0.3vw 0.3vw 0 #ff6600"; // -5px -5px 0 #ff6600, 5px -5px 0 #ff6600, -5px 5px 0 #ff6600, 5px 5px 0 #ff6600
-// text2.style.color = "orange";
 text2.style.width = 300;
 text2.style.height = 300;
-text2.style.position = 'absolute';
-text2.style.top = "50%";
-text2.style.left = "50%";
 text2.style.transform = "translate(-50%,-50%)";
 text2.style.whiteSpace = "nowrap";
 var text22 = document.createElement("div");
-text22.innerHTML = "W A S D to move";
-text22.style.fontSize = "6vw";
-text2.appendChild(text22);
-document.body.appendChild(text2);
+text22.innerHTML = "W/A/S/D to move";
+text22.style.fontSize = "5vw";
+text22.style.fontFamily = "Impact,Charcoal,sans-serif";
+text22.style.color = "#ff6600";
+text22.style.textShadow = "0vw 0.2vw 0.5vw rgba(0,0,0,0.6)";
+text22.style.transform = "translate(-50%,-150%)";
+text22.style.whiteSpace = "nowrap";
+text22.style.padding = 0;
+text02.appendChild(text2);
+text02.appendChild(text22);
+document.body.appendChild(text02);
 
 // score
 var text1 = document.createElement('div');
@@ -155,6 +161,7 @@ text5.appendChild(text6);
 
 
 function render() {
+    // for ( let ii = 0; ii < 1; ++ ii ) {
     for ( let ii = 0; ii < views.length; ++ ii ) {
         const view = views[ ii ];
         const camera = view.camera;
@@ -175,12 +182,12 @@ function render() {
         renderer.render( scene, camera );
     }
     if(!text2Removed && gameStarted) {
-        var left = parseInt(text2.style.left.slice(0,-1));
+        var left = parseInt(text02.style.left.slice(0,-1));
         if(left>=140) {
-            document.body.removeChild(text2);
+            document.body.removeChild(text02);
             text2Removed = true;
         } else {
-            text2.style.left = (left+3)+"%";
+            text02.style.left = (left+4)+"%";
         }
     }
     if(gameStarted) {
