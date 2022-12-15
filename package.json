@@ -20,7 +20,9 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.7",
-    "three": "^0.116.0",
+    "howler": "^2.2.3",
+    "stats.js": "^0.17.0",
+    "three": "^0.147.0",
     "three-nebula": "^10.0.3",
     "three-obj-loader": "^1.1.3",
     "webpack-cli": "^3.3.11"
