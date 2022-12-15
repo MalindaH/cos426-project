@@ -103,9 +103,6 @@ class SeedScene extends Scene {
         this.checkCollisions();
 
         this.deleteUnseenObjects();
-
-        // Check for game over 
-        
     }
 
     updatePopulateScene() {
@@ -113,13 +110,13 @@ class SeedScene extends Scene {
             const type = Math.floor(Math.random()*possibleFloorTypes.length);
             this.makeFloorRow(type, this.state.numFloorRowsCreated * gridsize);
         }
-        // TODO: placeholder for spawning cars
-        // Spawn single car in row 3 from right to left
-        if(this.state.cars.length <= 1) { // car type 0 (golfcart), 1 (psafe), or 2 (tiger transit bus)
-            this.spawnCar(1, 2, 0);
-            this.spawnCar(2, 3, 1);
-            this.spawnCar(0, 4, 0);
-        }
+        // // TODO: placeholder for spawning cars
+        // // Spawn single car in row 3 from right to left
+        // if(this.state.cars.length <= 1) { // car type 0 (golfcart), 1 (psafe), or 2 (tiger transit bus)
+        //     this.spawnCar(1, 2*gridsize, 0);
+        //     this.spawnCar(2, 3*gridsize, 1);
+        //     this.spawnCar(0, 4*gridsize, 0);
+        // }
     }
 
     deleteUnseenObjects() {
@@ -284,29 +281,29 @@ class SeedScene extends Scene {
             cube.castShadow = true;
             cube.receiveShadow = true;
 
-            // // TODO: placeholder for spawning cars
-            // const side = Math.floor(Math.random()*2);
-            // const cartype = Math.floor(Math.random()*3);
-            // var carWidth = carTypeWidths[cartype];
-            // var xx;
-            // if(side == 0) {
-            //     // leftmost position
-            //     // xx = ((gridMaxX - (gridMaxX+charMaxX)/3)*Math.random() + (gridMaxX+charMaxX)/3) *gridsize;
-            //     xx = gridMaxX * gridsize;
-            // }
-            // else if(side == 1) {
-            //     // rightmost position
-            //     xx = gridMinX * gridsize;
-            // }
-            // for(var i=0; i<2+Math.random()*2; i++) {
-            //     // this.spawnCar(Math.floor(Math.random()*3), z/gridsize, Math.floor(Math.random()*2));
-            //     this.spawnCarXZ(cartype, xx, z, side);
-            //     if(side == 0) {
-            //         xx -= carWidth+Math.random()*3+2;
-            //     } else {
-            //         xx += carWidth+Math.random()*3+2;
-            //     }
-            // }
+            // spawn cars
+            const side = Math.floor(Math.random()*2);
+            const cartype = Math.floor(Math.random()*3);
+            var carWidth = carTypeWidths[cartype];
+            var xx;
+            if(side == 0) {
+                // leftmost position
+                // xx = ((gridMaxX - (gridMaxX+charMaxX)/3)*Math.random() + (gridMaxX+charMaxX)/3) *gridsize;
+                xx = gridMaxX * gridsize;
+            }
+            else if(side == 1) {
+                // rightmost position
+                xx = gridMinX * gridsize;
+            }
+            for(var i=0; i<3+Math.random()*2; i++) {
+                // this.spawnCar(Math.floor(Math.random()*3), z/gridsize, Math.floor(Math.random()*2));
+                this.spawnCarXZ(cartype, xx, z, side);
+                if(side == 0) {
+                    xx -= carWidth+Math.random()*6+3;
+                } else {
+                    xx += carWidth+Math.random()*6+3;
+                }
+            }
         }
 
         this.state.floorType.push(typeArray);
@@ -490,7 +487,7 @@ class SeedScene extends Scene {
 
         // Add if statements with types to change car model
         // var car = this.makeCar(0xff9e00, x, z * gridsize);
-        var car = this.makeCarGltf(type, x, z * gridsize, side);
+        var car = this.makeCarGltf(type, x, z, side);
         var hitBox = car.state.hitBox;
 
         // Add hitBox
@@ -527,6 +524,10 @@ class SeedScene extends Scene {
 
             // Remove car if out of "view"
             if(prevPosX < gridMinX * gridsize || prevPosX > gridMaxX * gridsize) {
+                // add another car from the starting edge
+                this.spawnCar(cars[i].type, cars[i].car.position.z, cars[i].side);
+
+                // delete old car
                 cars[i].hitBox = null;
                 this.remove(cars[i].car);
                 this.remove(cars[i].visual);

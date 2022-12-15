@@ -137,7 +137,7 @@ class Character extends Group {
             if(lastTimeStep == 0) {
                 lastTimeStep = timeStamp;
             } else {
-                this.state.particlesystem.Step((timeStamp-lastTimeStep)*0.001, this.position.y+1);
+                this.state.particlesystem.Step((timeStamp-lastTimeStep)*0.001, this.position.y+0.9);
                 lastTimeStep = timeStamp;
             }
         }

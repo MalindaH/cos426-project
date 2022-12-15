@@ -13,7 +13,8 @@ varying vec2 vAngle;
 void main() {
   vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
   gl_Position = projectionMatrix * mvPosition;
-  gl_PointSize = size * pointMultiplier / gl_Position.w;
+  gl_PointSize = size * pointMultiplier / gl_Position.w / 1.5;
+    // gl_PointSize = size / gl_Position.w;
   vAngle = vec2(cos(angle), sin(angle));
   vColour = colour;
 }`;  
@@ -126,25 +127,25 @@ class ParticleSystem extends Group {
         // this._colourSpline.AddPoint(0.0, new THREE.Color(0xffff80));
         // this._colourSpline.AddPoint(1.0, new THREE.Color(0xff8080));
 
-        this._sizeSpline = new LinearSpline((t, a, b) => {
-            return a + t * (b - a);
-        });
-        this._sizeSpline.AddPoint(0.0, 1.0);
-        this._sizeSpline.AddPoint(0.5, 5.0);
-        this._sizeSpline.AddPoint(1.0, 1.0);
+        // this._sizeSpline = new LinearSpline((t, a, b) => {
+        //     return a + t * (b - a);
+        // });
+        // this._sizeSpline.AddPoint(0.0, 1.0);
+        // this._sizeSpline.AddPoint(0.5, 5.0);
+        // this._sizeSpline.AddPoint(1.0, 1.0);
 
-        document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
+        // document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
 
         this._UpdateGeometry();
     }
 
-    _onKeyUp(event) {
-        switch (event.keyCode) {
-            case 32: // SPACE
-                this._AddParticles();
-                break;
-        }
-    }
+    // _onKeyUp(event) {
+    //     switch (event.keyCode) {
+    //         case 32: // SPACE
+    //             this._AddParticles();
+    //             break;
+    //     }
+    // }
 
     _AddParticles(timeElapsed, y) {
         if (!this.gdfsghk) {
@@ -162,7 +163,7 @@ class ParticleSystem extends Group {
                     y,
                     (Math.random() * 2 - 1) * 2
                 ),
-                size: (Math.random() * 0.5 + 0.5) * 4.0,
+                size: (Math.random() * 0.1),
                 colour: new THREE.Color(Math.random(), Math.random(), Math.random()),
                 alpha: 1.0,
                 life: life,
@@ -182,7 +183,8 @@ class ParticleSystem extends Group {
         for (let p of this._particles) {
             positions.push(p.position.x, p.position.y, p.position.z);
             colours.push(p.colour.r, p.colour.g, p.colour.b, p.alpha);
-            sizes.push(p.currentSize);
+            // sizes.push(p.currentSize);
+            sizes.push(p.size);
             angles.push(p.rotation);
         }
 
@@ -223,7 +225,7 @@ class ParticleSystem extends Group {
 
             p.rotation += timeElapsed * 0.5;
             p.alpha = this._alphaSpline.Get(t);
-            p.currentSize = p.size * this._sizeSpline.Get(t);
+            // p.currentSize = p.size * this._sizeSpline.Get(t);
             // p.colour.copy(this._colourSpline.Get(t));
 
             p.position.add(p.velocity.clone().multiplyScalar(timeElapsed));

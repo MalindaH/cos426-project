@@ -8,7 +8,7 @@ const floory = -1;
 const gridsize = 2;
 const charStartX = 10;
 
-const boxWidth = gridsize+2.5;
+const boxWidth = gridsize+2.7;
 const boxHeight = 2;
 const boxDepth = gridsize-1;
 const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
@@ -22,7 +22,7 @@ class TigerTransit extends Group {
 
         // Init state
         this.state = {
-            speed: 12,
+            speed: 8,
             hitBox: null,
             charObject: null,
             // model: null,
@@ -35,7 +35,7 @@ class TigerTransit extends Group {
         loader.load(MODEL, (gltf) => {
             gltf.scene.scale.set(0.4, 0.4, 0.4); 
             gltf.scene.position.y -= 0.35;
-            gltf.scene.position.x -= 0.4;
+            // gltf.scene.position.x -= 0.1;
             this.add(gltf.scene);
             gltf.scene.traverse( function( node ) {
                 if ( node.isMesh ) { node.castShadow = true; }
@@ -45,7 +45,7 @@ class TigerTransit extends Group {
             }
         });
 
-        box.position.x = x;
+        box.position.x = x+0.1;
         box.position.y = floory+1+boxHeight/2;
         box.position.z = z;
         this.state.charObject = box;

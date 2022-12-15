@@ -22,7 +22,7 @@ class GolfCart extends Group {
 
         // Init state
         this.state = {
-            speed: 7,
+            speed: 5,
             hitBox: null,
             charObject: null,
             // model: null,
@@ -35,7 +35,6 @@ class GolfCart extends Group {
         loader.load(MODEL, (gltf) => {
             gltf.scene.scale.set(0.006, 0.006, 0.006); 
             gltf.scene.position.y += 0.3;
-            gltf.scene.position.x += 0.2;
             this.add(gltf.scene);
             gltf.scene.traverse( function( node ) {
                 if ( node.isMesh ) { node.castShadow = true; }
