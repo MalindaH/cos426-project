@@ -94,14 +94,16 @@ class SeedScene extends Scene {
 
         this.updatePopulateScene();
 
-        // Check floor under player
-        this.checkFloor(timeStamp);
-        
         // Update movement of car and remove cars out of certain range
         this.updateCars(timeStamp);
 
-        // Check for collisions between cars
-        // this.checkCollisions();
+        if(!this.state.isGameOver) {
+            // Check floor under player
+            this.checkFloor(timeStamp);
+
+            // Check for collisions between cars
+            this.checkCollisions();
+        }
 
         this.deleteUnseenObjects();
     }
@@ -438,17 +440,23 @@ class SeedScene extends Scene {
                 if(objsByZ[zLane]!=undefined && objsByZ[zLane].length>0) {
                     const river = objsByZ[zLane][0];
                     river.state.boats.forEach( b => {
-                        // console.log(z, b.position, b.state.hitBox);
                         if(character.state.hitBox.intersectsBox(b.state.hitBox)) {
                             var translateX = river.state.speed*subt;
                             if(river.state.direction) {
                                 translateX = -translateX;  
                             }
                             if(character.position.x+translateX<0) { //charMinX*gridsize
-                                translateX = -character.position.x;
+                                this.state.isGameOver = true;
+                                character.dieWater();
+                                return;
+                                // translateX = -character.position.x;
                             } else if(character.position.x+translateX>charMaxX*gridsize) {
-                                translateX = charMaxX*gridsize-character.position.x;
+                                // translateX = charMaxX*gridsize-character.position.x;
+                                this.state.isGameOver = true;
+                                character.dieWater();
+                                return;
                             }
+                            character.state.isOnLog = true;
                             character.position.x += translateX;
                             const posOff = new THREE.Vector3(translateX, 0, 0);
                             character.state.hitBox.translate(posOff);
@@ -456,6 +464,10 @@ class SeedScene extends Scene {
                             visualBox = new THREE.Box3Helper(charHitBox, 0xffa500);
                         }
                     });
+                }
+                if(!character.state.isOnLog) {
+                    this.state.isGameOver = true;
+                    character.dieWater();
                 }
                 // visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }

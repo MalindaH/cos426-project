@@ -42,6 +42,7 @@ class Character extends Group {
             toDieX: 0,
             toDieZ: 0,
             particlesystem: null,
+            isOnLog: false,
         };
 
         // Load object
@@ -132,6 +133,13 @@ class Character extends Group {
         }
     }
 
+    dieWater() {
+        if(!this.state.isGameOver) {
+            this.state.isGameOver = true;
+            
+        }
+    }
+
     update(timeStamp) {
         if(this.state.isGameOver) {
             if(lastTimeStep == 0) {
@@ -218,6 +226,9 @@ class Character extends Group {
                 posOff.setZ = Math.round(posOff.z);
                 this.state.hitBox.translate(posOff);
             } else if(this.state.jumping) {
+                if(this.state.isOnLog) {
+                    this.state.isOnLog = false;
+                }
                 if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
                     this.state.jumping = false;
                     this.state.jumpTime = 0;
