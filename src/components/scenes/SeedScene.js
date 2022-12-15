@@ -100,7 +100,7 @@ class SeedScene extends Scene {
         this.updateCars(timeStamp);
 
         // Check for collisions between cars
-        //this.checkCollisions();
+        this.checkCollisions();
 
         this.deleteUnseenObjects();
     }
