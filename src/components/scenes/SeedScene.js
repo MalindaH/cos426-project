@@ -434,9 +434,11 @@ class SeedScene extends Scene {
                 // check if character is on log
                 const {objsByZ, character} = this.state;
                 const zLane = z+6;
+                visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
                 if(objsByZ[zLane]!=undefined && objsByZ[zLane].length>0) {
                     const river = objsByZ[zLane][0];
                     river.state.boats.forEach( b => {
+                        // console.log(z, b.position, b.state.hitBox);
                         if(character.state.hitBox.intersectsBox(b.state.hitBox)) {
                             var translateX = river.state.speed*subt;
                             if(river.state.direction) {
@@ -450,10 +452,12 @@ class SeedScene extends Scene {
                             character.position.x += translateX;
                             const posOff = new THREE.Vector3(translateX, 0, 0);
                             character.state.hitBox.translate(posOff);
+
+                            visualBox = new THREE.Box3Helper(charHitBox, 0xffa500);
                         }
                     });
                 }
-                visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
+                // visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }
             else if(floorType === 2) { // road
                 visualBox = new THREE.Box3Helper(charHitBox, 0x000000);

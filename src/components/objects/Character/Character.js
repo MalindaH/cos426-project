@@ -212,11 +212,11 @@ class Character extends Group {
                 this.state.jumpTimeElapsed += 1;
                 this.position.y = Math.abs(Math.sin(Math.min(1,this.state.jumpTimeElapsed/jumpTimeTotal)*Math.PI)) * 2;
                 // Position offset
-            var posOff = this.position.clone().sub(prevPos);
-            //Round x and z coords
-            posOff.setX = Math.round(posOff.x);
-            posOff.setZ = Math.round(posOff.z);
-            this.state.hitBox.translate(posOff);
+                var posOff = this.position.clone().sub(prevPos);
+                //Round x and z coords
+                posOff.setX = Math.round(posOff.x);
+                posOff.setZ = Math.round(posOff.z);
+                this.state.hitBox.translate(posOff);
             } else if(this.state.jumping) {
                 if(this.state.jumpMovex<=EPS && this.state.jumpMovex>=-EPS && this.state.jumpMovez<=EPS && this.state.jumpMovez>=-EPS) {
                     this.state.jumping = false;
@@ -239,22 +239,12 @@ class Character extends Group {
                     }
                 }
                 // Position offset
-            var posOff = this.position.clone().sub(prevPos);
-            //Round x and z coords
-            posOff.setX = Math.round(posOff.x);
-            posOff.setZ = Math.round(posOff.z);
-            this.state.hitBox.translate(posOff);
+                var posOff = this.position.clone().sub(prevPos);
+                //Round x and z coords
+                posOff.setX = Math.round(posOff.x);
+                posOff.setZ = Math.round(posOff.z);
+                this.state.hitBox.translate(posOff);
             }
-            
-            // // Position offset
-            // var posOff = this.position.clone().sub(prevPos);
-            // //Round x and z coords
-            // posOff.setX = Math.round(posOff.x);
-            // posOff.setZ = Math.round(posOff.z);
-            // this.state.hitBox.translate(posOff);
-    
-            // Advance tween animations, if any exist
-            // TWEEN.update();
         }
     }
 }

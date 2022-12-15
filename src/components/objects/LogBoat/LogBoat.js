@@ -24,17 +24,16 @@ class LogBoat extends Group {
             prev: new THREE.Vector3(0,0,0)
         };
 
-        let log = this.makeBoat(0x966F33, 0, 0)
-        var hitBox = new THREE.Box3().setFromObject(log);
-        hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
-
+        let log = this.makeBoat(0x966F33, 0, 0);
         // log.geometry.computeBoundingBox()
         this.state.log = log;
         // this.state.hitBox = log.geometry.boundingBox;
+        var hitBox = new THREE.Box3().setFromObject(log);
+        hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
         this.state.hitBox = hitBox;
 
         // this.state.hitBox.translate(log.position)
-        // this.state.hitBox.translate(new THREE.Vector3(0,0,idx*gridsize))
+        this.state.hitBox.translate(new THREE.Vector3(10,0,idx*gridsize));
 
 
         this.castShadow = true;

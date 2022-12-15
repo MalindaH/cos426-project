@@ -28,7 +28,7 @@ class River extends Group {
             boats: null,
             prevTimeStamp: 0,
             hitBox: null,
-            visualHitBoxes: [],
+            // visualHitBoxes: [],
         };
 
         const texture = new THREE.TextureLoader().load( watertexture );
@@ -48,9 +48,9 @@ class River extends Group {
         const boxHeight = gridsize;
         const boxDepth = gridsize - 0.3;
         const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-        geometry.computeBoundingBox();
-        this.state.hitBox = geometry.boundingBox;
-
+        // geometry.computeBoundingBox();
+        // this.state.hitBox = geometry.boundingBox;
+        
 
         const Playable = () => new THREE.Mesh(
             geometry, 
@@ -62,7 +62,7 @@ class River extends Group {
         // );
         const river = Playable()
         river.receiveShadow = true;
-        this.add(river)
+        this.add(river);
 
         // const edgeL = Nonelayable();
         // edgeL.position.x = -playablewidth;
@@ -77,6 +77,10 @@ class River extends Group {
         this.rotation.x = -Math.PI/2;
         this.position.z = gridsize * idx
         this.receiveShadow = true;
+
+        var hitBox = new THREE.Box3().setFromObject(river);
+        this.state.hitBox = hitBox;
+        this.state.hitBox.translate(new THREE.Vector3(0,0,idx*gridsize));
 
         // River
 
@@ -115,13 +119,13 @@ class River extends Group {
     
 
     update(timeStamp) {
-        this.state.visualHitBoxes.forEach(visual=> {
-            this.remove(visual);
-        });
-        this.state.boats.forEach(boat=>{
-            var visualBox = new THREE.Box3Helper(boat.state.hitBox, 0xff0000);
-            this.add(visualBox);
-        });
+        // this.state.visualHitBoxes.forEach(visual=> {
+        //     this.remove(visual);
+        // });
+        // this.state.boats.forEach(boat=>{
+        //     var visualBox = new THREE.Box3Helper(boat.state.hitBox, 0xff0000);
+        //     this.add(visualBox);
+        // });
 
 
         let subt = 0
