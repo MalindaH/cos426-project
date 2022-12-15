@@ -1,11 +1,11 @@
 import * as Dat from 'dat.gui';
 import { Scene, Color } from 'three';
-import { Flower, Land, Character, GolfCart, Psafe, TigerTransit, Tree } from 'objects';
+import { Character, GolfCart, Psafe, TigerTransit, Tree, River } from 'objects';
 import { BasicLights } from 'lights';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
-import watertexture from '../../textures/water.png';
+// import watertexture from '../../textures/water.png';
 
 const EPS = 0.001;
 const floory = -1;
@@ -46,9 +46,10 @@ class SeedScene extends Scene {
             visualCharHitBox: null,
             cars: [],
             numFloorRowsCreated: 0,
-            objsByZ: [], // objsByZ[z]: all objects on grid's z-th row
+            objsByZ: [], // objsByZ[z]: all objects on grid's (z-6)-th row
             prototypeTree: null,
             isGameOver: false,
+            prevTimeStamp: 0,
         };
         
         this.state.prototypeTree = new Tree(this, charStartX, 0, 0.4, 0);
@@ -94,13 +95,13 @@ class SeedScene extends Scene {
         this.updatePopulateScene();
 
         // Check floor under player
-        this.checkFloor();
+        this.checkFloor(timeStamp);
         
         // Update movement of car and remove cars out of certain range
         this.updateCars(timeStamp);
 
         // Check for collisions between cars
-        this.checkCollisions();
+        // this.checkCollisions();
 
         this.deleteUnseenObjects();
     }
@@ -122,13 +123,13 @@ class SeedScene extends Scene {
     deleteUnseenObjects() {
         const {objsByZ, cameras} = this.state;
         const camera = cameras[0];
-        // const ZtoDelete = Math.floor((camera.position.z-14)/2)+6;
-        // if(ZtoDelete>=0 && objsByZ[ZtoDelete]!=undefined && objsByZ[ZtoDelete].length>0) {
-        //     objsByZ[ZtoDelete].forEach(element => {
-        //         this.remove(element);
-        //     });
-        //     objsByZ[ZtoDelete] = [];
-        // }
+        const ZtoDelete = Math.floor((camera.position.z-14)/2)+6;
+        if(ZtoDelete>=0 && objsByZ[ZtoDelete]!=undefined && objsByZ[ZtoDelete].length>0) {
+            objsByZ[ZtoDelete].forEach(element => {
+                this.remove(element);
+            });
+            objsByZ[ZtoDelete] = [];
+        }
 
         var frustum = new THREE.Frustum();
         frustum.setFromProjectionMatrix( new THREE.Matrix4().multiplyMatrices( camera.projectionMatrix, camera.matrixWorldInverse ) );
@@ -241,27 +242,31 @@ class SeedScene extends Scene {
         }
         else if(type === 1) { // water
             typeArray = Array((charMaxX-charMinX+1)*gridsize).fill(type);
-            const boxWidth = (gridMaxX-gridMinX)*gridsize;
-            const boxHeight = 1;
-            const boxDepth = gridsize;
-            const x = (gridMinX+gridMaxX)*gridsize/2;
-            const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-            const texture = new THREE.TextureLoader().load( watertexture );
-            // const texture = new THREE.TextureLoader().load( './public/textures/water.png' );
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.minFilter = THREE.LinearFilter;
-            texture.repeat.set(10,1);
-            const material = new THREE.MeshPhongMaterial( { map: texture} );
+            const river = new River(this, z/gridsize);
+            this.add(river);
+            objects.push(river);
 
-            const cube = new THREE.Mesh(geometry, material);
-            this.add(cube);
-            objects.push(cube);
-            cube.position.x = x;
-            cube.position.y = floory+boxHeight/2-0.3;
-            cube.position.z = z;
-            cube.castShadow = true;
-            cube.receiveShadow = true;
+            // const boxWidth = (gridMaxX-gridMinX)*gridsize;
+            // const boxHeight = 1;
+            // const boxDepth = gridsize;
+            // const x = (gridMinX+gridMaxX)*gridsize/2;
+            // const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+            // const texture = new THREE.TextureLoader().load( watertexture );
+            // // const texture = new THREE.TextureLoader().load( './public/textures/water.png' );
+            // texture.wrapS = THREE.RepeatWrapping;
+            // texture.wrapT = THREE.RepeatWrapping;
+            // texture.minFilter = THREE.LinearFilter;
+            // texture.repeat.set(10,1);
+            // const material = new THREE.MeshPhongMaterial( { map: texture} );
+
+            // const cube = new THREE.Mesh(geometry, material);
+            // this.add(cube);
+            // objects.push(cube);
+            // cube.position.x = x;
+            // cube.position.y = floory+boxHeight/2-0.3;
+            // cube.position.z = z;
+            // cube.castShadow = true;
+            // cube.receiveShadow = true;
         }
         else if (type === 2){ // road
             typeArray = Array((charMaxX-charMinX+1)*gridsize).fill(type);
@@ -309,7 +314,6 @@ class SeedScene extends Scene {
         this.state.floorType.push(typeArray);
         this.state.numFloorRowsCreated++;
         this.state.objsByZ.push(objects);
-        // return objects;
     }
 
     makeCube(color, x, z) {
@@ -384,7 +388,13 @@ class SeedScene extends Scene {
         lights.state.dir.target.position.z += movez;
     }
 
-    checkFloor() {
+    checkFloor(timeStamp) {
+        if (this.state.prevTimeStamp == 0){
+            this.state.prevTimeStamp = timeStamp;
+        }
+        const subt = timeStamp - this.state.prevTimeStamp;
+        this.state.prevTimeStamp = timeStamp;
+
         // landed flag to stop checking if already checked
         var landed = false;
         var isJumping = this.state.character.state.jumping;
@@ -421,7 +431,28 @@ class SeedScene extends Scene {
                 visualBox = new THREE.Box3Helper(charHitBox, 0xffffff);
             }
             else if(floorType === 1){ // water
-                // Add character state to check if character is on log
+                // check if character is on log
+                const {objsByZ, character} = this.state;
+                const zLane = z+6;
+                if(objsByZ[zLane]!=undefined && objsByZ[zLane].length>0) {
+                    const river = objsByZ[zLane][0];
+                    river.state.boats.forEach( b => {
+                        if(character.state.hitBox.intersectsBox(b.state.hitBox)) {
+                            var translateX = river.state.speed*subt;
+                            if(river.state.direction) {
+                                translateX = -translateX;  
+                            }
+                            if(character.position.x+translateX<0) { //charMinX*gridsize
+                                translateX = -character.position.x;
+                            } else if(character.position.x+translateX>charMaxX*gridsize) {
+                                translateX = charMaxX*gridsize-character.position.x;
+                            }
+                            character.position.x += translateX;
+                            const posOff = new THREE.Vector3(translateX, 0, 0);
+                            character.state.hitBox.translate(posOff);
+                        }
+                    });
+                }
                 visualBox = new THREE.Box3Helper(charHitBox, 0x001bff);
             }
             else if(floorType === 2) { // road
@@ -552,7 +583,8 @@ class SeedScene extends Scene {
 
     checkCollisions() {
         const {cars, character} = this.state;
-        // var cars = this.state.cars;
+        
+        // check collisions with cars
         for(var i = 0; i < cars.length; i++) {
             var posZ = cars[i].car.position.z;
 

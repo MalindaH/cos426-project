@@ -60,7 +60,7 @@ class Psafe extends Group {
 
         // Create hitBox from box and attach to character
         var hitBox = new THREE.Box3().setFromObject(this.state.charObject);
-        // hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
+        hitBox.expandByVector(new THREE.Vector3(0, 0.1, 0));
         this.state.hitBox = hitBox;
 
         // Add self to parent's update list

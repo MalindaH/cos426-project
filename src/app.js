@@ -161,8 +161,8 @@ text5.appendChild(text6);
 
 
 function render() {
-    // for ( let ii = 0; ii < 1; ++ ii ) {
-    for ( let ii = 0; ii < views.length; ++ ii ) {
+    for ( let ii = 0; ii < 1; ++ ii ) {
+    // for ( let ii = 0; ii < views.length; ++ ii ) {
         const view = views[ ii ];
         const camera = view.camera;
 
