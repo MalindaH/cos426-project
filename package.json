@@ -1,19 +1,15 @@
 {
-  "name": "lower-case-dashed-name-of-project",
-  "repository": "REPOSITORY-NAME-AS-IT-APPEARS-IN-GITHUB-URL",
+  "name": "tiger-road",
+  "repository": "cos426-project",
   "version": "0.1.0",
-  "title": "PROJECT TITLE HERE",
+  "title": "TIGER ROAD",
   "description": "SHORT DESCRIPTION OF PROJECT HERE. ONE TO TWO SENTENCES MAX",
   "keywords": [
     "Princeton",
     "graphics",
     "three.js",
     "COS 426",
-    "ivy league",
-    "keyword1",
-    "keyword2",
-    "...",
-    "this last entry CANNOT have a comma after it ->"
+    "Crossy Road"
   ],
   "scripts": {
     "start": "webpack-dev-server --mode development --output-public-path \"\"",
@@ -24,8 +20,10 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.7",
-    "three": "^0.146.0",
-    "three-obj-loader": "^1.1.3"
+    "three": "^0.116.0",
+    "three-nebula": "^10.0.3",
+    "three-obj-loader": "^1.1.3",
+    "webpack-cli": "^3.3.11"
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
