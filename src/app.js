@@ -90,6 +90,7 @@ const scene = new SeedScene(views[0].camera, views[1].camera);
 
 // game title TIGER ROAD
 var text2 = document.createElement('div');
+text2.style.justifyContent = "center";
 text2.innerHTML = "TIGER ROAD";
 //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
 text2.style.fontSize = "10vw";
@@ -103,6 +104,10 @@ text2.style.top = "50%";
 text2.style.left = "50%";
 text2.style.transform = "translate(-50%,-50%)";
 text2.style.whiteSpace = "nowrap";
+var text22 = document.createElement("div");
+text22.innerHTML = "W A S D to move";
+text22.style.fontSize = "6vw";
+text2.appendChild(text22);
 document.body.appendChild(text2);
 
 // score

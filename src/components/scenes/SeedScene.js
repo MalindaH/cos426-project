@@ -21,7 +21,7 @@ const camerasFollowTime = [100, 50];
 
 const possibleFloorTypes = ["grass", "water", "road"];
 const possibleCarTypes = ["GolfCart", "Psafe", "TigerTransit"];
-const carTypeWidths = [2.5, 4, 4.5];
+const carTypeWidths = [2.7, 4.5, 5];
 const maxTreePercentage = 0.25;
 
 const loader = new GLTFLoader();
@@ -299,9 +299,9 @@ class SeedScene extends Scene {
                 // this.spawnCar(Math.floor(Math.random()*3), z/gridsize, Math.floor(Math.random()*2));
                 this.spawnCarXZ(cartype, xx, z, side);
                 if(side == 0) {
-                    xx -= carWidth+Math.random()*6+3;
+                    xx -= 1.8*carWidth+Math.random()*6;
                 } else {
-                    xx += carWidth+Math.random()*6+3;
+                    xx += carWidth+Math.random()*6+4;
                 }
             }
         }
