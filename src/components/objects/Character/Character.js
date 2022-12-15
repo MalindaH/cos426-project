@@ -2,7 +2,7 @@ import { Group } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
-// import MODEL from './mallard/scene.gltf';
+import MODEL from './mallard.gltf';
 import {ParticleSystem} from 'objects';
 
 const EPS = 0.001;
@@ -24,6 +24,7 @@ class Character extends Group {
         this.state = {
             // gui: parent.state.gui,
             parent: parent,
+            numStepsForward: 0,
             jumping: false,
             jumpQueue: [],
             jumpMovex: 0,
@@ -46,7 +47,7 @@ class Character extends Group {
         // Load object
         const loader = new GLTFLoader();
 
-        loader.load('./src/gltf/mallard/scene.gltf', (gltf) => {
+        loader.load(MODEL, (gltf) => {
             gltf.scene.scale.set(0.7, 0.7, 0.7); 
             gltf.scene.position.z += 0.3;
             this.add(gltf.scene);
@@ -168,6 +169,7 @@ class Character extends Group {
                         this.state.unsqeeze=0.3;
                         this.rotation.y = 0;
                         this.jump(0, gridsize);
+                        this.state.numStepsForward++;
                         break;
                     case 2: //"left"
                         this.state.sqeeze=0.3;
@@ -180,6 +182,7 @@ class Character extends Group {
                         this.state.unsqeeze=0.3;
                         this.rotation.y = Math.PI;
                         this.jump(0, -gridsize);
+                        this.state.numStepsForward--;
                         break;
                     case 4: //"right"
                         this.state.sqeeze=0.3;

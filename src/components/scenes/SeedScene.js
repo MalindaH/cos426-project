@@ -5,7 +5,7 @@ import { BasicLights } from 'lights';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import * as THREE from 'three';
 
-const gameOverText = true;
+import watertexture from '../../textures/water.png';
 
 const EPS = 0.001;
 const floory = -1;
@@ -249,7 +249,8 @@ class SeedScene extends Scene {
             const boxDepth = gridsize;
             const x = (gridMinX+gridMaxX)*gridsize/2;
             const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-            const texture = new THREE.TextureLoader().load( './src/textures/water.png' );
+            const texture = new THREE.TextureLoader().load( watertexture );
+            // const texture = new THREE.TextureLoader().load( './public/textures/water.png' );
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
             texture.minFilter = THREE.LinearFilter;
@@ -566,7 +567,6 @@ class SeedScene extends Scene {
                 this.state.isGameOver = true;
                 var xDist = 1;
                 var zDist = 1;
-                // var EPS = 0.15;
                 // if(character.state.hitBox.min.x-hitBox.max.x<=EPS || hitBox.min.x-character.state.hitBox.max.x<=EPS) {
                 if(Math.max(character.state.hitBox.min.x-hitBox.max.x, hitBox.min.x-character.state.hitBox.max.x) <= EPS) {
                     xDist = Math.max(character.state.hitBox.min.x-hitBox.max.x, hitBox.min.x-character.state.hitBox.max.x);
@@ -575,23 +575,7 @@ class SeedScene extends Scene {
                 if (Math.max(character.state.hitBox.min.z-hitBox.max.z, hitBox.min.z-character.state.hitBox.max.z)<=EPS) {
                     zDist = Math.max(character.state.hitBox.min.z-hitBox.max.z, hitBox.min.z-character.state.hitBox.max.z);
                 }
-                // console.log(xDist, zDist);
                 character.die(xDist>zDist);
-                // const xDist = Math.abs(Math.min(
-                //     // hitBox.max.x-character.state.hitBox.max.x, 
-                //     character.state.hitBox.min.x-hitBox.max.x, 
-                //     hitBox.min.x-character.state.hitBox.max.x
-                //     // hitBox.min.x-character.state.hitBox.min.x
-                //     ));//  (hitBox.max.x+hitBox.min.x)/2 - (character.state.hitBox.max.x+character.state.hitBox.min.x)/2);
-                // const zDist = Math.abs(Math.min(hitBox.max.z-character.state.hitBox.max.z, 
-                //     hitBox.max.z-character.state.hitBox.min.z, 
-                //     hitBox.min.z-character.state.hitBox.max.z, 
-                //     hitBox.min.z-character.state.hitBox.min.z)); // Math.abs((hitBox.max.z+hitBox.min.z)/2 - (character.state.hitBox.max.z+character.state.hitBox.min.z)/2);
-                // // or inside
-                // character.die(xDist > zDist);
-                if(gameOverText) {
-
-                }
 
                 var visualBox = new THREE.Box3Helper(character.state.hitBox, 0xff0000);
                 this.remove(this.state.visualCharHitBox);

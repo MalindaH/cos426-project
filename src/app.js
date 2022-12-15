@@ -13,7 +13,6 @@ import * as THREE from 'three';
 
 var gameStarted = false;
 var text2Removed = false;
-var numStepsForward = 0;
 var text3Added = false;
 
 const charStartX = 10;
@@ -236,11 +235,7 @@ document.addEventListener("keydown", (event) => {
     if(!gameStarted && (event.which == 87 || event.which == 65 || event.which == 83 || event.which == 68) ) {
         gameStarted = true;
     }
-    if(event.which == 87) { // w
-        numStepsForward++;
-    } else if (event.which == 83) { // s
-        numStepsForward--;
-    }
+    var numStepsForward = scene.state.character.state.numStepsForward;
     var score = parseInt(text1.innerHTML);
     text1.innerHTML = Math.max(score, numStepsForward);
     scene.onDocumentKeyDown(event);

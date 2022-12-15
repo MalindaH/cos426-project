@@ -2,6 +2,7 @@ import { Group } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
+import MODEL from './tigertransit.gltf';
 
 const floory = -1;
 const gridsize = 2;
@@ -31,7 +32,7 @@ class TigerTransit extends Group {
         // Load object
         const loader = new GLTFLoader();
 
-        loader.load('./src/gltf/tiger_transit/bus_new2.gltf', (gltf) => {
+        loader.load(MODEL, (gltf) => {
             gltf.scene.scale.set(0.4, 0.4, 0.4); 
             gltf.scene.position.y -= 0.35;
             gltf.scene.position.x -= 0.4;

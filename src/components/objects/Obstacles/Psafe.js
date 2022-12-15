@@ -2,6 +2,7 @@ import { Group } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { TWEEN } from 'three/examples/jsm/libs/tween.module.min.js';
 import * as THREE from 'three';
+import MODEL from './policecar1.gltf';
 
 const floory = -1;
 const gridsize = 2;
@@ -31,7 +32,7 @@ class Psafe extends Group {
         // Load object
         const loader = new GLTFLoader();
 
-        loader.load('./src/gltf/police/policecar.gltf', (gltf) => {
+        loader.load(MODEL, (gltf) => {
             gltf.scene.scale.set(0.8, 0.8, 0.8); 
             gltf.scene.position.y += 0.1;
             gltf.scene.position.x -= 0.2;

@@ -109,7 +109,6 @@ class ParticleSystem extends Group {
 
         this._points = new THREE.Points(this._geometry, this._material);
 
-        console.log(this._points);
         parent.add(this._points);
 
         this._alphaSpline = new LinearSpline((t, a, b) => {
