@@ -7,25 +7,33 @@ class BasicLights extends Group {
         super(...args);
         this.state = {
             dir: null,
+            // dir2: null,
         };
 
-        const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+        const dir = new THREE.DirectionalLight(0xffffff, 1);
         const ambi = new AmbientLight(0x404040, 1.32);
         const hemi = new HemisphereLight(0xffffbb, 0x080820, 0.3);
 
-        dir.position.set(5, 5, 0);
+        dir.position.set(15, 20, 0);
         dir.target.position.set(0, 0, 0);
-        dir.shadow.camera.right = 3;
-        dir.shadow.camera.left = -20;
-        dir.shadow.camera.top = 10;
+        dir.shadow.camera.right = 30;
+        dir.shadow.camera.left = -25;
+        dir.shadow.camera.top = 15;
         dir.shadow.camera.bottom = -30;
         dir.shadow.mapSize.width = 1024;
         dir.shadow.mapSize.height = 1024;
         dir.castShadow = true;
 
-        this.state.dir = dir;
+        const dir2 = new THREE.DirectionalLight(0xffffff, 0.3);
+        dir2.position.set(10, 10, -20);
+        dir2.target.position.set(10, 10, 0);
+        // const helper = new THREE.DirectionalLightHelper( dir2);
+        // this.add( helper );
 
-        this.add(ambi, hemi, dir);
+        this.state.dir = dir;
+        // this.state.dir2 = dir2;
+
+        this.add(ambi, hemi, dir, dir2);
     }
 }
 
