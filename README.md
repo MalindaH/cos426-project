@@ -1,4 +1,7 @@
 # COS 426 Final Project: Tiger Roads
+By Malinda Huang, Angelo Gonzalez, Brian Max Tchouambe
+
+### Development notes:
 
 To start developing: `npm install && npm start`
 
