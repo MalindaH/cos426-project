@@ -10,6 +10,9 @@ To deploy: `npm run deploy`, the demo will be live [here](https://malindah.githu
 
 # [Game Demo](https://malindah.github.io/cos426-project/)
 
+<img width="1435" alt="image" src="https://user-images.githubusercontent.com/36162640/208329981-287ae33f-dd4e-434d-bea2-143a56061407.png">
+
+
 
 Some screen recordings:
 
