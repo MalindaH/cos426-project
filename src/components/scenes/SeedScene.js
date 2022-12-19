@@ -180,30 +180,54 @@ class SeedScene extends Scene {
     }
 
     makeGrassRowAtStart() { // grass with extra trees, for negative z values that character can't jump to
+        const boxWidth = 15*gridsize;
+        const boxHeight = 1;
+        const boxDepth = gridsize-0.05;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+        const material = new THREE.MeshPhongMaterial({color:"#008013"});
         for(var j = -6; j < -4; j++) {
             var objects = [];
             for (var i = -2; i <= 12; i++) {
-                var cube = this.makeCube("#008013", i * gridsize, j*gridsize);
-                objects.push(cube);
+                // var cube = this.makeCube("#008013", i * gridsize, j*gridsize);
+                // objects.push(cube);
                 var tree = new Tree(this, i * gridsize, j*gridsize, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
                 // var visualBox = new THREE.Box3Helper(tree.state.hitBox, 0x001bff);
                 // this.add(visualBox);
                 this.add(tree);
                 objects.push(tree);
             }
+
+            const cube = new THREE.Mesh(geometry, material);
+            this.add(cube);
+            cube.position.x = charStartX;
+            cube.position.y = floory+boxHeight/2;
+            cube.position.z = j*gridsize;
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            objects.push(cube);
+
             this.state.objsByZ.push(objects);
         }
         for(var j = -4; j < 0; j++) {
             var objects = [];
             for (var i = -2; i <= 12; i++) {
-                var cube = this.makeCube("#008013", i * gridsize, j*gridsize);
-                objects.push(cube);
+                // var cube = this.makeCube("#008013", i * gridsize, j*gridsize);
+                // objects.push(cube);
                 if(i<charMinX || i>charMaxX) {
                     var tree = new Tree(this, i * gridsize, j*gridsize, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
                     this.add(tree);
                     objects.push(tree);
                 }
             }
+
+            const cube = new THREE.Mesh(geometry, material);
+            this.add(cube);
+            cube.position.x = charStartX;
+            cube.position.y = floory+boxHeight/2;
+            cube.position.z = j*gridsize;
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            objects.push(cube);
             this.state.objsByZ.push(objects);
         }
     }
@@ -213,15 +237,10 @@ class SeedScene extends Scene {
         var objects = [];
         if(type === 0) { // grass
             for (var i = gridMinX; i <= gridMaxX; i++) {
-                var cube = this.makeCube("#008013", i * gridsize, z);
-                objects.push(cube);
+                // var cube = this.makeCube("#008013", i * gridsize, z);
+                // objects.push(cube);
                 if(i<charMinX || i>charMaxX) {
                     var tree = new Tree(this, i * gridsize, z, 0.2+Math.random()*0.2, Math.floor(Math.random()*2));
-                    // var tree = this.state.prototypeTree.clone();
-                    // tree.position.x = i * gridsize;
-                    // tree.position.z = z;
-                    // const s = 0.5+Math.random()*0.5
-                    // tree.scale.set(s,s,s);
                     this.add(tree);
                     objects.push(tree);
                 } else {
@@ -235,55 +254,33 @@ class SeedScene extends Scene {
                     }
                 }
             }
-            // const boxWidth = (gridMaxX-gridMinX)*gridsize;
-            // const boxHeight = 1;
-            // const boxDepth = gridsize;
-            // const x = (gridMinX+gridMaxX)*gridsize/2;
-            // const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-            // const material = new THREE.MeshPhongMaterial({color:"#008013"});
+            const boxWidth = (gridMaxX-gridMinX)*gridsize;
+            const boxHeight = 1;
+            const boxDepth = gridsize-0.05;
+            const x = (gridMinX+gridMaxX)*gridsize/2;
+            const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+            const material = new THREE.MeshPhongMaterial({color:"#008013"});
 
-            // const cube = new THREE.Mesh(geometry, material);
-            // this.add(cube);
-            // cube.position.x = x;
-            // cube.position.y = floory+boxHeight/2;
-            // cube.position.z = z;
-            // cube.castShadow = true;
-            // cube.receiveShadow = true;
-            // typeArray = Array((gridMaxX-gridMinX+1)*gridsize).fill(type);
+            const cube = new THREE.Mesh(geometry, material);
+            this.add(cube);
+            cube.position.x = x;
+            cube.position.y = floory+boxHeight/2;
+            cube.position.z = z;
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            objects.push(cube);
         }
         else if(type === 1) { // water
             typeArray = Array((charMaxX-charMinX+1)*gridsize).fill(type);
             const river = new River(this, z/gridsize);
             this.add(river);
             objects.push(river);
-
-            // const boxWidth = (gridMaxX-gridMinX)*gridsize;
-            // const boxHeight = 1;
-            // const boxDepth = gridsize;
-            // const x = (gridMinX+gridMaxX)*gridsize/2;
-            // const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-            // const texture = new THREE.TextureLoader().load( watertexture );
-            // // const texture = new THREE.TextureLoader().load( './public/textures/water.png' );
-            // texture.wrapS = THREE.RepeatWrapping;
-            // texture.wrapT = THREE.RepeatWrapping;
-            // texture.minFilter = THREE.LinearFilter;
-            // texture.repeat.set(10,1);
-            // const material = new THREE.MeshPhongMaterial( { map: texture} );
-
-            // const cube = new THREE.Mesh(geometry, material);
-            // this.add(cube);
-            // objects.push(cube);
-            // cube.position.x = x;
-            // cube.position.y = floory+boxHeight/2-0.3;
-            // cube.position.z = z;
-            // cube.castShadow = true;
-            // cube.receiveShadow = true;
         }
         else if (type === 2){ // road
             typeArray = Array((charMaxX-charMinX+1)*gridsize).fill(type);
             const boxWidth = (gridMaxX-gridMinX)*gridsize;
             const boxHeight = 0.9;
-            const boxDepth = gridsize;
+            const boxDepth = gridsize-0.05;
             const x = (gridMinX+gridMaxX)*gridsize/2;
             const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
             const material = new THREE.MeshPhongMaterial({color:0x696362});
@@ -311,13 +308,13 @@ class SeedScene extends Scene {
                 // rightmost position
                 xx = gridMinX * gridsize;
             }
-            for(var i=0; i<3+Math.random()*2; i++) {
+            for(var i=0; i<2+Math.random()*2; i++) {
                 // this.spawnCar(Math.floor(Math.random()*3), z/gridsize, Math.floor(Math.random()*2));
                 this.spawnCarXZ(cartype, xx, z, side);
                 if(side == 0) {
-                    xx -= 1.8*carWidth+Math.random()*6;
+                    xx -= 2*carWidth+Math.random()*6+4;
                 } else {
-                    xx += carWidth+Math.random()*6+4;
+                    xx += 2*carWidth+Math.random()*6+4;
                 }
             }
         }

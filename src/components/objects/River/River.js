@@ -95,7 +95,7 @@ class River extends Group {
         }
             
         const taken = new Set();
-        this.state.boats = [1,1,1].map(() => {
+        this.state.boats = [1,1,1,1,1].map(() => {
             const boat = new LogBoat(parent, idx);
             //boat.state.hitBox.translate(new THREE.Vector3(gridsize * 10,gridsize * 10,0))
             let spot = Math.floor(Math.random()*playable/2)
