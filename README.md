@@ -1,4 +1,4 @@
-# COS 426 Final Project: Tiger Roads
+# COS 426 Final Project: Tiger Road
 By Malinda Huang, Angelo Gonzalez, Brian Max Tchouambe
 
 ### Development notes:
